@@ -44,9 +44,9 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
      * This implementation triggers exception when key is null or {@link #lookup(Object)} returns null. Otherwise,
      * delegates to {@code lookup} and return the value.
      */
-    public T get(Object key) {
+    public T get(final Object key) {
         if (key == null) throw new IllegalArgumentException("key must not be null");
-        T value = lookup(key);
+        final T value = lookup(key);
         if (value != null) return value;
         throw new LookupException("Value not found for given key " + key);
     }
@@ -57,7 +57,7 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
      * This implementation calls {@link #lookup(Object)} if key is not null or otherwise return null.
      */
     @CheckForNull
-    public T safeGet(@Nullable Object key) {
+    public T safeGet(@Nullable final Object key) {
         return key == null ? null : lookup(key);
     }
 }

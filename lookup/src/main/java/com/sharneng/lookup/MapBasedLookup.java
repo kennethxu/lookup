@@ -22,12 +22,12 @@ import java.util.Map;
 class MapBasedLookup<T> extends AbstractLookup<T> {
     private final Map<? extends Object, ? extends T> map;
 
-    MapBasedLookup(Map<? extends Object, ? extends T> map) {
+    MapBasedLookup(final Map<? extends Object, ? extends T> map) {
         this.map = map;
     }
 
-    MapBasedLookup(Collection<? extends T> values, Converter<T, Object> converter) {
-        Map<Object, T> map = new HashMap<Object, T>();
+    MapBasedLookup(final Collection<? extends T> values, final Converter<T, Object> converter) {
+        final Map<Object, T> map = new HashMap<Object, T>();
         for (T value : values) {
             map.put(converter.convert(value), value);
         }
@@ -35,7 +35,7 @@ class MapBasedLookup<T> extends AbstractLookup<T> {
     }
 
     @Override
-    protected T lookup(Object key) {
+    protected T lookup(final Object key) {
         return map.get(key);
     }
 }

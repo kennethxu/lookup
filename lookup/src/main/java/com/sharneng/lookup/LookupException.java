@@ -33,7 +33,7 @@ public class LookupException extends RuntimeException {
      * @param message
      *            the exception message
      */
-    public LookupException(String message) {
+    public LookupException(final String message) {
         super(message);
     }
 
@@ -43,7 +43,7 @@ public class LookupException extends RuntimeException {
      * @param cause
      *            the cause of the error
      */
-    public LookupException(Throwable cause) {
+    public LookupException(final Throwable cause) {
         super(cause);
     }
 

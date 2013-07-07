@@ -21,10 +21,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 class PropertyConverter<TFrom> implements Converter<TFrom, Object> {
-    private Method getter;
+    private final Method getter;
 
-    public PropertyConverter(Class<TFrom> clazz, String property) {
-        PropertyDescriptor p;
+    public PropertyConverter(final Class<TFrom> clazz, final String property) {
+        final PropertyDescriptor p;
         try {
             p = new PropertyDescriptor(property, clazz);
         } catch (IntrospectionException e) {
@@ -33,7 +33,7 @@ class PropertyConverter<TFrom> implements Converter<TFrom, Object> {
         getter = p.getReadMethod();
     }
 
-    public Object convert(TFrom source) {
+    public Object convert(final TFrom source) {
         try {
             return source == null ? null : getter.invoke(source, (Object[]) null);
         } catch (IllegalAccessException e) {
