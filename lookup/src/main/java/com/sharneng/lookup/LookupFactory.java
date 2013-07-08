@@ -49,7 +49,8 @@ public final class LookupFactory {
     /**
      * Create a lookup for objects in the given collection indexed by given property.
      * <p>
-     * The class where the index property is searched for is determined by the first element in the collection.
+     * The class where the index property is searched for is determined by the first non-null element in the collection.
+     * Other than that, this is equivalent to {@link #create(Collection, Class, String)}.
      * 
      * @param values
      *            a collection of objects that can be looked up.
@@ -65,6 +66,22 @@ public final class LookupFactory {
         return create(values, getElementClass(values), property);
     }
 
+    /**
+     * Create a two level lookup for objects in the given collection indexed by given properties.
+     * <p>
+     * The class where the index properties are searched for is determined by the first non-null element in the
+     * collection. Other than that, this is equivalent to {@link #create(Collection, Class, String, String)}.
+     * 
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param property1
+     *            the first index property
+     * @param property2
+     *            the second index property
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
+     */
     public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final String property1,
             final String property2) {
         final Lookup<?> lookup = create(values, new String[] { property1, property2 });
@@ -73,6 +90,20 @@ public final class LookupFactory {
         return result;
     }
 
+    /**
+     * Create multilevel lookup for objects in the given collection indexed by given properties.
+     * <p>
+     * The class where the index properties are searched for is determined by the first non-null element in the
+     * collection. Other than that, it is equivalent to {@link #create(Collection, Class, String...)}.
+     * 
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param properties
+     *            the index properties
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     */
     public static <T> Lookup<?> create(final Collection<? extends T> values, final String... properties) {
         checkValues(values);
         return create(values, getElementClass(values), properties);
@@ -98,6 +129,21 @@ public final class LookupFactory {
         return create(values, new PropertyConverter<T>(clazz, property));
     }
 
+    /**
+     * Create a two level lookup for objects in the given collection indexed by given properties defined on given class.
+     * 
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param clazz
+     *            the class where the index property is searched for
+     * @param property1
+     *            the first index property
+     * @param property2
+     *            the second index property
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
+     */
     public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final Class<T> clazz,
             final String property1, final String property2) {
         final Lookup<?> lookup = create(values, clazz, new String[] { property1, property2 });
@@ -106,6 +152,19 @@ public final class LookupFactory {
         return result;
     }
 
+    /**
+     * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
+     * 
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param clazz
+     *            the class where the index property is searched for
+     * @param properties
+     *            the index properties
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     */
     public static <T> Lookup<?> create(final Collection<? extends T> values, final Class<T> clazz,
             final String... properties) {
         checkValues(values);
@@ -113,28 +172,28 @@ public final class LookupFactory {
         if (properties == null) throw new IllegalArgumentException(notNull("properties"));
         if (properties.length == 0) throw new IllegalArgumentException("At least one property must be supplied");
         @SuppressWarnings("unchecked")
-        Converter<T, Object>[] converters = new Converter[properties.length];
+        final Converter<T, Object>[] converters = new Converter[properties.length];
         for (int i = 0; i < properties.length; i++) {
             if (properties[i] == null) throw new IllegalArgumentException(notNull("property" + (i + 1)));
-            converters[i++] = new PropertyConverter<T>(clazz, properties[i]);
+            converters[i] = new PropertyConverter<T>(clazz, properties[i]);
         }
-        return create(values, converters);
+        return createMultiLookup(values, 0, converters);
     }
 
-    public static <T> Lookup<T> create(final Collection<? extends T> values, final Converter<T, Object> converter) {
+    static <T> Lookup<T> create(final Collection<? extends T> values, final Converter<T, Object> converter) {
         checkValues(values);
         if (converter == null) throw new IllegalArgumentException(notNull("converter"));
         return createPrivate(values, converter);
     }
 
-    public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values,
-            final Converter<T, Object> converter1, final Converter<T, Object> converter2) {
+    static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final Converter<T, Object> converter1,
+            final Converter<T, Object> converter2) {
         @SuppressWarnings("unchecked")
         Lookup<Lookup<T>> result = (Lookup<Lookup<T>>) create(values, new Converter[] { converter1, converter2 });
         return result;
     }
 
-    public static <T> Lookup<?> create(final Collection<? extends T> values, final Converter<T, Object>... converters) {
+    static <T> Lookup<?> create(final Collection<? extends T> values, final Converter<T, Object>... converters) {
         checkValues(values);
         checkConverters(converters);
         return createMultiLookup(values, 0, converters);

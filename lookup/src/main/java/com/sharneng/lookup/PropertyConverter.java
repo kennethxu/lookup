@@ -15,22 +15,32 @@
  */
 package com.sharneng.lookup;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
+import static java.util.Locale.ENGLISH;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 class PropertyConverter<TFrom> implements Converter<TFrom, Object> {
+    private static final Class<?>[] empty = new Class[0];
     private final Method getter;
 
     public PropertyConverter(final Class<TFrom> clazz, final String property) {
-        final PropertyDescriptor p;
+        Method getter;
         try {
-            p = new PropertyDescriptor(property, clazz);
-        } catch (IntrospectionException e) {
-            throw new LookupException(e);
+            final String capitalize = property.substring(0, 1).toUpperCase(ENGLISH) + property.substring(1);
+            try {
+                getter = clazz.getMethod("get" + capitalize, empty);
+            } catch (NoSuchMethodException e) {
+                try {
+                    getter = clazz.getMethod("is" + capitalize, empty);
+                } catch (NoSuchMethodException e2) {
+                    throw e;
+                }
+            }
+        } catch (NoSuchMethodException e) {
+            throw new LookupException("Unable to find getter for property " + property, e);
         }
-        getter = p.getReadMethod();
+        this.getter = getter;
     }
 
     public Object convert(final TFrom source) {

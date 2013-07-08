@@ -47,4 +47,16 @@ public class LookupException extends RuntimeException {
         super(cause);
     }
 
+    /**
+     * Construct a new {@code LookupException} with given message and another exception as the cause of error.
+     * 
+     * @param message
+     *            the exception message
+     * @param cause
+     *            the cause of the error
+     */
+    public LookupException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

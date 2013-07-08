@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
  * @param <TTo>
  *            type of the object to convert to
  */
-public interface Converter<TFrom, TTo> {
+interface Converter<TFrom, TTo> {
 
     /**
      * Convert from one object to another.
