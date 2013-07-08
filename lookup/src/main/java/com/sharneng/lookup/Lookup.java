@@ -40,9 +40,11 @@ public interface Lookup<T> {
     T get(Object key);
 
     /**
-     * Lookup the reference object by given key. Return null if not found.
+     * Lookup the reference object by given key without throwing exception when object is not found.
      * <p>
-     * This is different from {@link #get(Object)} by not throwing exception.
+     * Instead of like {@link #get(Object)}, which throws exception when object is not found for a given key, this
+     * method will return a default value. The default value is implementation dependent but typically returns a null
+     * unless the {@code T} itself is {@code Lookup}.
      * 
      * @param key
      *            the key to lookup the object.
@@ -50,4 +52,6 @@ public interface Lookup<T> {
      */
     @CheckForNull
     T safeGet(@Nullable Object key);
+
+    // T safeGet(@Nullable Object key, T defaultValue);
 }

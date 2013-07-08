@@ -26,9 +26,14 @@ import java.util.Map;
  * @author Kenneth Xu
  * 
  */
-public final class LookupFactory {
+public final class Lookups {
 
-    private LookupFactory() {
+    /**
+     * Lookup API supports no more than 10 levels of lookups.
+     */
+    public static final int LEVEL_LIMIT = 10;
+
+    private Lookups() {
     }
 
     /**
@@ -237,7 +242,7 @@ public final class LookupFactory {
             lookupMap.put(entry.getKey(), createMultiLookup(entry.getValue(), index, converters));
         }
 
-        return new MapBasedLookup<Lookup<?>>(lookupMap);
+        return new MultiLevelLookup<Lookup<?>>(lookupMap, converters.length - index - 1);
     }
 
     private static void checkValues(final Collection<?> values) {
