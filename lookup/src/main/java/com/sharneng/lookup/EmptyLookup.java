@@ -29,4 +29,14 @@ class EmptyLookup<T> implements Lookup<T> {
     public T safeGet(Object key) {
         return defaultValue;
     }
+
+    @Override
+    public T safeGet(Object key, T defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
+    public T getOrNull(Object key) {
+        return null;
+    }
 }

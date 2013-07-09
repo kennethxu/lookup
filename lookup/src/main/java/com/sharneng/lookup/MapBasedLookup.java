@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Original Authors
+ * Copyright (c) 2013 Original Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,13 @@ import java.util.Map;
 class MapBasedLookup<T> extends AbstractLookup<T> {
     private final Map<? extends Object, ? extends T> map;
 
-    MapBasedLookup(final Map<? extends Object, ? extends T> map) {
+    MapBasedLookup(final Map<? extends Object, ? extends T> map, T defaultValue) {
+        super(defaultValue);
         this.map = map;
     }
 
-    MapBasedLookup(final Collection<? extends T> values, final Converter<T, Object> converter) {
+    MapBasedLookup(final Collection<? extends T> values, T defaultValue, final Converter<T, Object> converter) {
+        super(defaultValue);
         final Map<Object, T> map = new HashMap<Object, T>();
         for (T value : values) {
             map.put(converter.convert(value), value);

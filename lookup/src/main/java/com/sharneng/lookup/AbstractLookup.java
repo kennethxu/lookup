@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Original Authors
+ * Copyright (c) 2013 Original Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,18 @@ import javax.annotation.Nullable;
  */
 public abstract class AbstractLookup<T> implements Lookup<T> {
 
+    private final T defaultValue;
+
+    /**
+     * Construct a new instance with the specified default value.
+     * 
+     * @param defaultValue
+     *            the default value to be used by {@link #safeGet(Object)} method.
+     */
+    protected AbstractLookup(T defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
     /**
      * Subclass to implements the actual lookup logic.
      * 
@@ -54,10 +66,33 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #lookup(Object)} if key is not null or otherwise return null.
+     * This implementation calls {@link #getOrNull(Object)}. If the result is not null, return the result. Otherwise
+     * return the {@code defaultValue} passed to constructor.
      */
     @CheckForNull
     public T safeGet(@Nullable final Object key) {
+        return safeGet(key, defaultValue);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This implementation calls {@link #getOrNull(Object)}. If the result is not null, return the result. Otherwise
+     * return the {@code defaultValue} parameter.
+     */
+    @Override
+    public T safeGet(Object key, T defaultValue) {
+        final T result = getOrNull(key);
+        return result == null ? (T) defaultValue : result;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This implementation calls {@link #lookup(Object)} if key is not null or otherwise return null.
+     */
+    @Override
+    public T getOrNull(Object key) {
         return key == null ? null : lookup(key);
     }
 }

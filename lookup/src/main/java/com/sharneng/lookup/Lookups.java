@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Original Authors
+ * Copyright (c) 2013 Original Authors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public final class Lookups {
      */
     public static <T> Lookup<T> create(final Map<? extends Object, ? extends T> map) {
         if (map == null) throw new IllegalArgumentException(notNull("map"));
-        return new MapBasedLookup<T>(map);
+        return new MapBasedLookup<T>(map, null);
     }
 
     /**
@@ -217,7 +217,7 @@ public final class Lookups {
 
     private static <T> Lookup<T> createPrivate(final Collection<? extends T> values,
             final Converter<T, Object> converter) {
-        return new MapBasedLookup<T>(values, converter);
+        return new MapBasedLookup<T>(values, null, converter);
     }
 
     private static <T> Lookup<?> createMultiLookup(final Collection<? extends T> values, int index,
