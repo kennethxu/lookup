@@ -131,7 +131,7 @@ public final class Lookups {
         checkValues(values);
         if (clazz == null) throw new IllegalArgumentException(notNull("clazz"));
         if (property == null) throw new IllegalArgumentException(notNull("property"));
-        return create(values, new PropertyConverter<T>(clazz, property));
+        return create(values, null, new PropertyConverter<T>(clazz, property));
     }
 
     /**
@@ -182,26 +182,28 @@ public final class Lookups {
             if (properties[i] == null) throw new IllegalArgumentException(notNull("property" + (i + 1)));
             converters[i] = new PropertyConverter<T>(clazz, properties[i]);
         }
-        return createMultiLookup(values, 0, converters);
+        return createMultiLookup(values, null, 0, converters);
     }
 
-    static <T> Lookup<T> create(final Collection<? extends T> values, final Converter<T, Object> converter) {
+    static <T> Lookup<T> create(final Collection<? extends T> values, T defaultValue,
+            final Converter<T, Object> converter) {
         checkValues(values);
         if (converter == null) throw new IllegalArgumentException(notNull("converter"));
-        return createPrivate(values, converter);
+        return createPrivate(values, defaultValue, converter);
     }
 
-    static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final Converter<T, Object> converter1,
-            final Converter<T, Object> converter2) {
+    static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, T defaultValue,
+            final Converter<T, Object> converter1, final Converter<T, Object> converter2) {
         @SuppressWarnings("unchecked")
         Lookup<Lookup<T>> result = (Lookup<Lookup<T>>) create(values, new Converter[] { converter1, converter2 });
         return result;
     }
 
-    static <T> Lookup<?> create(final Collection<? extends T> values, final Converter<T, Object>... converters) {
+    static <T> Lookup<?> create(final Collection<? extends T> values, T defaultValue,
+            final Converter<T, Object>... converters) {
         checkValues(values);
         checkConverters(converters);
-        return createMultiLookup(values, 0, converters);
+        return createMultiLookup(values, defaultValue, 0, converters);
     }
 
     private static <T> Class<T> getElementClass(final Collection<? extends T> values) {
@@ -215,16 +217,16 @@ public final class Lookups {
         throw new IllegalArgumentException("Argument values collection must contain non-null element");
     }
 
-    private static <T> Lookup<T> createPrivate(final Collection<? extends T> values,
+    private static <T> Lookup<T> createPrivate(final Collection<? extends T> values, T defaultValue,
             final Converter<T, Object> converter) {
-        return new MapBasedLookup<T>(values, null, converter);
+        return new MapBasedLookup<T>(values, defaultValue, converter);
     }
 
-    private static <T> Lookup<?> createMultiLookup(final Collection<? extends T> values, int index,
+    private static <T> Lookup<?> createMultiLookup(final Collection<? extends T> values, T defaultValue, int index,
             final Converter<T, Object>[] converters) {
 
         Converter<T, Object> converter = converters[index];
-        if (++index == converters.length) return createPrivate(values, converter); // last one
+        if (++index == converters.length) return createPrivate(values, defaultValue, converter); // last one
 
         Map<Object, Collection<T>> map = new HashMap<Object, Collection<T>>();
         for (T value : values) {
@@ -239,7 +241,7 @@ public final class Lookups {
 
         Map<Object, Lookup<?>> lookupMap = new HashMap<Object, Lookup<?>>();
         for (Map.Entry<Object, Collection<T>> entry : map.entrySet()) {
-            lookupMap.put(entry.getKey(), createMultiLookup(entry.getValue(), index, converters));
+            lookupMap.put(entry.getKey(), createMultiLookup(entry.getValue(), defaultValue, index, converters));
         }
 
         return new MultiLevelLookup<Lookup<?>>(lookupMap, converters.length - index - 1);
