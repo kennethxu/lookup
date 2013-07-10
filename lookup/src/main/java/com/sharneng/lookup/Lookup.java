@@ -16,7 +16,6 @@
 package com.sharneng.lookup;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
 /**
  * The primary interface to support lookup of a object by some index.
@@ -29,54 +28,66 @@ import javax.annotation.Nullable;
 public interface Lookup<T> {
 
     /**
-     * Lookup the reference object by given key.
-     * 
-     * @param key
-     *            the key to lookup the object
-     * @return the reference object found.
-     * @IllegalArgumentException when key is null;
-     * @LookupException if failed to lookup the reference object.
-     */
-    T get(Object key);
-
-    /**
-     * Lookup the reference object by given key, or return a default value when object is not found.
+     * Find and return the reference object by given key, or return a default value when the object is not found.
      * <p>
-     * Instead of like {@link #get(Object)}, which throws exception when object is not found for a given key, this
-     * method will return a default value. The default value is implementation dependent.
+     * The default value is implementation dependent and maybe null.
      * 
      * @param key
      *            the key to lookup the object.
      * @return the reference object found or a default value if not found.
      */
-    @Nullable
-    T safeGet(@Nullable Object key);
+    @CheckForNull
+    T find(@CheckForNull Object key);
 
     /**
-     * Lookup the reference object by given key, or return the specified default value when object is not found.
-     * <p>
-     * Instead of like {@link #get(Object)}, which throws exception when object is not found for a given key, this
-     * method will return a default value specified.
+     * Find and return the reference object by given key, or return the specified default value when the object is not
+     * found.
      * 
      * @param key
-     *            the key to lookup the object.
+     *            the key to lookup the object
      * @param defaultValue
-     *            the default value to be returned if object is not found.
-     * @return the reference object found or {@code defaultValue} if not found.
-     */
-    @Nullable
-    T safeGet(@Nullable Object key, T defaultValue);
-
-    /**
-     * Lookup the reference object by given key without throwing exception when object is not found.
-     * <p>
-     * Instead of like {@link #get(Object)}, which throws exception when object is not found for a given key, this
-     * method will return a null value.
-     * 
-     * @param key
-     *            the key to lookup the object.
-     * @return the reference object found or null if not found.
+     *            the default value, which can be {@code null}, to be returned if object is not found
+     * @return the reference object found or {@code defaultValue} if not found
      */
     @CheckForNull
-    T getOrNull(@Nullable Object key);
+    T find(@CheckForNull Object key, @CheckForNull T defaultValue);
+
+    /**
+     * Find and return the reference object by given key, or return a default value when the object is not found.
+     * <p>
+     * The default value is implementation dependent and must not be {@code null}.
+     * 
+     * @param key
+     *            the key to lookup the object
+     * @return the reference object found or a default value if not found
+     * @LookupException if failed to lookup the reference object and unable to provide a non {@code null} default value
+     */
+    T get(@CheckForNull Object key);
+
+    /**
+     * Find and return the reference object by given key, or return the specified default value when the object is not
+     * found.
+     * 
+     * @param key
+     *            the key to lookup the object
+     * @param defaultValue
+     *            the default value to be returned if object is not found
+     * @return the reference object found or {@code defaultValue} if not found
+     * @IllegalArgumentException when {@code defaultValue} is {@code null}
+     */
+    T get(@CheckForNull Object key, T defaultValue);
+
+    /**
+     * Find and return the reference object by given key, or fail if one doesn't exist.
+     * <p>
+     * {@code hunt} distinguish itself from {@code get} methods by throwing exception when the reference object cannot
+     * be found.
+     * 
+     * @param key
+     *            the key to lookup the object
+     * @return the reference object found
+     * @IllegalArgumentException when key is null
+     * @LookupException if failed to lookup the reference object
+     */
+    T hunt(@CheckForNull Object key);
 }

@@ -16,7 +16,6 @@
 package com.sharneng.lookup;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
 /**
  * A convenient abstract class that helps to implement {@link Lookup&lt;T&gt;} interface.
@@ -28,15 +27,16 @@ import javax.annotation.Nullable;
  */
 public abstract class AbstractLookup<T> implements Lookup<T> {
 
+    @CheckForNull
     private final T defaultValue;
 
     /**
      * Construct a new instance with the specified default value.
      * 
      * @param defaultValue
-     *            the default value to be used by {@link #safeGet(Object)} method.
+     *            the default value to be used by {@link #get(Object)} method.
      */
-    protected AbstractLookup(T defaultValue) {
+    protected AbstractLookup(@CheckForNull T defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -53,46 +53,59 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation triggers exception when key is null or {@link #lookup(Object)} returns null. Otherwise,
-     * delegates to {@code lookup} and return the value.
-     */
-    public T get(final Object key) {
-        if (key == null) throw new IllegalArgumentException("key must not be null");
-        final T value = lookup(key);
-        if (value != null) return value;
-        throw new LookupException("Value not found for given key " + key);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This implementation calls {@link #getOrNull(Object)}. If the result is not null, return the result. Otherwise
-     * return the {@code defaultValue} passed to constructor.
-     */
-    @CheckForNull
-    public T safeGet(@Nullable final Object key) {
-        return safeGet(key, defaultValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This implementation calls {@link #getOrNull(Object)}. If the result is not null, return the result. Otherwise
-     * return the {@code defaultValue} parameter.
+     * This implementation calls {@link #lookup(Object)} if key is not null or otherwise return null.
      */
     @Override
-    public T safeGet(Object key, T defaultValue) {
-        final T result = getOrNull(key);
+    public T find(@CheckForNull final Object key) {
+        return key == null ? null : lookup(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This implementation calls {@link #find(Object)}. If the result is not null, return the result. Otherwise return
+     * the {@code defaultValue} parameter.
+     */
+    @Override
+    public T find(@CheckForNull final Object key, @CheckForNull final T defaultValue) {
+        final T result = find(key);
         return result == null ? (T) defaultValue : result;
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #lookup(Object)} if key is not null or otherwise return null.
+     * This implementation calls {@link #find(Object, T)}. If the result is not null, return the result. Otherwise
+     * return the {@code defaultValue} passed to constructor.
+     */
+    public T get(@CheckForNull final Object key) {
+        final T result = find(key, defaultValue);
+        if (result != null) return result;
+        throw Utils.notFoundException(key);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This implementation calls {@link #find(Object, T)}. If the result is not null, return the result. Otherwise
+     * return the {@code defaultValue} parameter.
      */
     @Override
-    public T getOrNull(Object key) {
-        return key == null ? null : lookup(key);
+    public T get(@CheckForNull final Object key, final T defaultValue) {
+        if (defaultValue == null) throw new IllegalArgumentException(Utils.notNull("defaultValue"));
+        return find(key, defaultValue);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * This implementation triggers exception when key is null or {@link #lookup(Object)} returns null. Otherwise,
+     * delegates to {@code lookup} and return the value.
+     */
+    public T hunt(final Object key) {
+        if (key == null) throw new IllegalArgumentException(Utils.notNull("key"));
+        final T value = lookup(key);
+        if (value != null) return value;
+        throw Utils.notFoundException(key);
     }
 }

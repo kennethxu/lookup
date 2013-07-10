@@ -47,7 +47,7 @@ public final class Lookups {
      * 
      */
     public static <T> Lookup<T> create(final Map<? extends Object, ? extends T> map) {
-        if (map == null) throw new IllegalArgumentException(notNull("map"));
+        if (map == null) throw new IllegalArgumentException(Utils.notNull("map"));
         return new MapBasedLookup<T>(map, null);
     }
 
@@ -67,7 +67,7 @@ public final class Lookups {
      */
     public static <T> Lookup<T> create(final Collection<? extends T> values, final String property) {
         checkValues(values);
-        if (property == null) throw new IllegalArgumentException(notNull("property"));
+        if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
         return create(values, getElementClass(values), property);
     }
 
@@ -129,8 +129,8 @@ public final class Lookups {
      */
     public static <T> Lookup<T> create(final Collection<? extends T> values, final Class<T> clazz, final String property) {
         checkValues(values);
-        if (clazz == null) throw new IllegalArgumentException(notNull("clazz"));
-        if (property == null) throw new IllegalArgumentException(notNull("property"));
+        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
+        if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
         return create(values, null, new PropertyConverter<T>(clazz, property));
     }
 
@@ -173,13 +173,13 @@ public final class Lookups {
     public static <T> Lookup<?> create(final Collection<? extends T> values, final Class<T> clazz,
             final String... properties) {
         checkValues(values);
-        if (clazz == null) throw new IllegalArgumentException(notNull("clazz"));
-        if (properties == null) throw new IllegalArgumentException(notNull("properties"));
+        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
+        if (properties == null) throw new IllegalArgumentException(Utils.notNull("properties"));
         if (properties.length == 0) throw new IllegalArgumentException("At least one property must be supplied");
         @SuppressWarnings("unchecked")
         final Converter<T, Object>[] converters = new Converter[properties.length];
         for (int i = 0; i < properties.length; i++) {
-            if (properties[i] == null) throw new IllegalArgumentException(notNull("property" + (i + 1)));
+            if (properties[i] == null) throw new IllegalArgumentException(Utils.notNull("property" + (i + 1)));
             converters[i] = new PropertyConverter<T>(clazz, properties[i]);
         }
         return createMultiLookup(values, null, 0, converters);
@@ -188,7 +188,7 @@ public final class Lookups {
     static <T> Lookup<T> create(final Collection<? extends T> values, T defaultValue,
             final Converter<T, Object> converter) {
         checkValues(values);
-        if (converter == null) throw new IllegalArgumentException(notNull("converter"));
+        if (converter == null) throw new IllegalArgumentException(Utils.notNull("converter"));
         return createPrivate(values, defaultValue, converter);
     }
 
@@ -248,19 +248,15 @@ public final class Lookups {
     }
 
     private static void checkValues(final Collection<?> values) {
-        if (values == null) throw new IllegalArgumentException(notNull("values"));
+        if (values == null) throw new IllegalArgumentException(Utils.notNull("values"));
         if (values.size() == 0) throw new IllegalArgumentException("Argument values collection must not be empty");
     }
 
     private static void checkConverters(final Converter<?, Object>[] converters) {
-        if (converters == null) throw new IllegalArgumentException(notNull("converters"));
+        if (converters == null) throw new IllegalArgumentException(Utils.notNull("converters"));
         if (converters.length == 0) throw new IllegalArgumentException("At least one converter must be supplied");
         for (int i = 0; i < converters.length; i++) {
-            if (converters[i] == null) throw new IllegalArgumentException(notNull("converter" + (i + 1)));
+            if (converters[i] == null) throw new IllegalArgumentException(Utils.notNull("converter" + (i + 1)));
         }
-    }
-
-    private static String notNull(final String argumentName) {
-        return "Argument " + argumentName + " must not be null.";
     }
 }

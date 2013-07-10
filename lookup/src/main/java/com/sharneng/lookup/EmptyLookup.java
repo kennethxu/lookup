@@ -1,7 +1,10 @@
 package com.sharneng.lookup;
 
+import javax.annotation.CheckForNull;
+
 class EmptyLookup<T> implements Lookup<T> {
     private static final Lookup<?>[] CHAIN = new Lookup<?>[Lookups.LEVEL_LIMIT];
+    @CheckForNull
     private final T defaultValue;
 
     static {
@@ -16,27 +19,35 @@ class EmptyLookup<T> implements Lookup<T> {
         return CHAIN[level];
     }
 
-    EmptyLookup(T defaultValue) {
+    EmptyLookup(@CheckForNull T defaultValue) {
         this.defaultValue = defaultValue;
     }
 
     @Override
+    public T find(Object key) {
+        return defaultValue;
+    }
+
+    @Override
+    public T find(@CheckForNull Object key, @CheckForNull T defaultValue) {
+        return defaultValue;
+    }
+
+    @Override
     public T get(Object key) {
-        throw new LookupException("Value not found for given key " + key);
+        if (defaultValue != null) return defaultValue;
+        throw Utils.notFoundException(key);
     }
 
     @Override
-    public T safeGet(Object key) {
+    public T get(@CheckForNull Object key, T defaultValue) {
+        if (defaultValue == null) throw new IllegalArgumentException(Utils.notNull("defaultValue"));
         return defaultValue;
     }
 
     @Override
-    public T safeGet(Object key, T defaultValue) {
-        return defaultValue;
-    }
-
-    @Override
-    public T getOrNull(Object key) {
-        return null;
+    public T hunt(Object key) {
+        key.toString();
+        throw Utils.notFoundException(key);
     }
 }

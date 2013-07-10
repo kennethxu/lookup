@@ -18,7 +18,7 @@
  * 
  * @author Kenneth Xu
  */
-@javax.annotation.CheckForNull
 @javax.annotation.Nonnull
+@javax.annotation.ParametersAreNonnullByDefault
 package com.sharneng.lookup;
 

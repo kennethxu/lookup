@@ -16,7 +16,6 @@
 package com.sharneng.lookup;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
 /**
  * Interface to convert from one object to another.
@@ -38,5 +37,5 @@ interface Converter<TFrom, TTo> {
      * @return the converted object or null if source is null
      */
     @CheckForNull
-    TTo convert(@Nullable TFrom source);
+    TTo convert(@CheckForNull TFrom source);
 }

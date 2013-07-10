@@ -13,7 +13,7 @@ public class LookupsTest {
     public void createTwoLevelLookup_canGet_whenFound() {
         Lookup<Lookup<CountyCode>> lookup = Lookups.create(CountyCode.codes, "state", "county");
 
-        CountyCode p = lookup.get("Mississippi").get("Greene");
+        CountyCode p = lookup.hunt("Mississippi").hunt("Greene");
 
         assertThat(p.getCode(), is(28041));
     }
@@ -22,7 +22,7 @@ public class LookupsTest {
     public void createTwoLevelLookup_canSafeGet_whenFound() {
         Lookup<Lookup<CountyCode>> lookup = Lookups.create(CountyCode.codes, "state", "county");
 
-        CountyCode p = lookup.safeGet("Mississippi").safeGet("Greene");
+        CountyCode p = lookup.get("Mississippi").get("Greene");
 
         assertThat(p.getCode(), is(28041));
     }
@@ -31,7 +31,7 @@ public class LookupsTest {
     public void createTwoLevelLookup_canSafeGet_whenNotFoundLastLevel() {
         Lookup<Lookup<CountyCode>> lookup = Lookups.create(CountyCode.codes, "state", "county");
 
-        CountyCode p = lookup.safeGet("Mississippi").safeGet("No County");
+        CountyCode p = lookup.get("Mississippi").find("No County");
 
         assertThat(p, nullValue());
     }
@@ -40,7 +40,7 @@ public class LookupsTest {
     public void createTwoLevelLookup_canSafeGet_whenNotFoundFirstLevel() {
         Lookup<Lookup<CountyCode>> lookup = Lookups.create(CountyCode.codes, "state", "county");
 
-        CountyCode p = lookup.safeGet("No State").safeGet("Greene");
+        CountyCode p = lookup.get("No State").find("Greene");
 
         assertThat(p, nullValue());
     }
