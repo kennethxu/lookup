@@ -37,7 +37,10 @@ public final class Lookups {
     }
 
     /**
-     * Creates a lookup based on given map.
+     * Creates a lookup based on given map. This is equivalent to {@link #create(Map, Object) create(map, null)}.
+     * <p>
+     * Please note that the created lookup uses a copy of the map passed to ensure the thread safety and performance. So
+     * subsequent change to the map doesn't affect the create lookup object.
      * 
      * @param map
      *            the map to create the lookup
@@ -53,9 +56,14 @@ public final class Lookups {
 
     /**
      * Creates a lookup based on given map.
+     * <p>
+     * Please note that the created lookup uses a copy of the map passed to ensure the thread safety and performance. So
+     * subsequent change to the map doesn't affect the create lookup object.
      * 
      * @param map
      *            the map to create the lookup
+     * @param defaultValue
+     *            the default value to be used if the lookup object is not found
      * 
      * @param <T>
      *            type of the reference object to be looked up
@@ -132,11 +140,18 @@ public final class Lookups {
     /* default, values, string */
 
     /**
-     * Create a lookup for objects in the given collection indexed by given property.
+     * Create a lookup for objects in the given collection indexed by given property. The created lookup has default
+     * value returned when {@link Lookup#get(Object)} cannot find a reference object.
      * <p>
-     * The class where the index property is searched for is determined by the first non-null element in the collection.
-     * Other than that, this is equivalent to {@link #create(Collection, Class, String)}.
+     * The class where index properties are searched for is determined by the actual type of {@code defaultValue} if it
+     * is not null. Otherwise, the actual type of first non {@code null} element in values collection is used.
+     * <p>
+     * When {@code defaultValue} is not null, this is equivalent to {@link #create(Object, Collection, Class, String)
+     * create(defaultValue, values, defaultValue.getClass(), property)}. Otherwise this is equivalent to
+     * {@link #create(Collection, String) create(values, property)}.
      * 
+     * @param defaultValue
+     *            the default value to be used if the lookup object is not found
      * @param values
      *            a collection of objects that can be looked up.
      * @param property
@@ -152,11 +167,19 @@ public final class Lookups {
     }
 
     /**
-     * Create a two level lookup for objects in the given collection indexed by given properties.
+     * Create a two level lookup for objects in the given collection indexed by given properties.The created lookup has
+     * default value returned when {@link Lookup#get(Object)} cannot find a reference object.
      * <p>
-     * The class where the index properties are searched for is determined by the first non-null element in the
-     * collection. Other than that, this is equivalent to {@link #create(Collection, Class, String, String)}.
+     * The class where index properties are searched for is determined by the actual type of {@code defaultValue} if it
+     * is not null. Otherwise, the actual type of first non {@code null} element in values collection is used.
+     * <p>
+     * When {@code defaultValue} is not null, this is equivalent to
+     * {@link #create(Object, Collection, Class, String, String) create(defaultValue, values, defaultValue.getClass(),
+     * property1, property2)}. Otherwise this is equivalent to {@link #create(Collection, String, String) create(values,
+     * property1, property2)}.
      * 
+     * @param defaultValue
+     *            the default value to be used if the lookup object is not found
      * @param values
      *            a collection of objects that can be looked up.
      * @param property1
@@ -174,10 +197,18 @@ public final class Lookups {
     }
 
     /**
-     * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
+     * Create multilevel lookup for objects in the given collection indexed by given properties. The created lookup has
+     * default value returned when {@link Lookup#get(Object)} cannot find a reference object.
+     * <p>
+     * The class where index properties are searched for is determined by the actual type of {@code defaultValue} if it
+     * is not null. Otherwise, the actual type of first non {@code null} element in values collection is used.
+     * <p>
+     * When {@code defaultValue} is not null, this is equivalent to
+     * {@link #create(Object, Collection, Class, String...) create(defaultValue, values, defaultValue.getClass(),
+     * properties)}. Otherwise this is equivalent to {@link #create(Collection, String...) create(values, properties)}.
      * 
      * @param defaultValue
-     *            TODO the class where the index property is searched for
+     *            the default value to be used if the lookup object is not found
      * @param values
      *            a collection of objects that can be looked up.
      * @param properties
@@ -196,6 +227,7 @@ public final class Lookups {
 
     /**
      * Create a {@link Lookup} for objects in the given collection indexed by given property defined on given class.
+     * This is equivalent to {@link #create(Object, Collection, Class, String) create(null, values, clazz, property)}
      * 
      * @param values
      *            a collection of objects that can be looked up
@@ -215,6 +247,8 @@ public final class Lookups {
 
     /**
      * Create a two level lookup for objects in the given collection indexed by given properties defined on given class.
+     * This is equivalent to {@link #create(Object, Collection, Class, String, String) create(null, values, clazz,
+     * property1, property2)}
      * 
      * @param values
      *            a collection of objects that can be looked up.
@@ -235,7 +269,9 @@ public final class Lookups {
     }
 
     /**
-     * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
+     * Create multilevel lookup for objects in the given collection indexed by the properties defined on given class.
+     * This is equivalent to {@link #create(Object, Collection, Class, String...) create(null, values, clazz,
+     * properties)}.
      * 
      * @param values
      *            a collection of objects that can be looked up.
@@ -256,13 +292,15 @@ public final class Lookups {
     /* class, default, values, string */
 
     /**
-     * Create a lookup for objects in the given collection indexed by given property.
-     * <p>
-     * The class where the index property is searched for is determined by the first non-null element in the collection.
-     * Other than that, this is equivalent to {@link #create(Collection, Class, String)}.
+     * Create a lookup for objects in the given collection indexed by the property defined on given class. The created
+     * lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference object.
      * 
+     * @param defaultValue
+     *            the default value to be used if the lookup object is not found
      * @param values
      *            a collection of objects that can be looked up.
+     * @param clazz
+     *            the class where the index property is searched for
      * @param property
      *            the index property
      * 
@@ -278,13 +316,19 @@ public final class Lookups {
     }
 
     /**
-     * Create a two level lookup for objects in the given collection indexed by given properties.
+     * Create a two level lookup for objects in the given collection indexed by the properties defined on given
+     * class.The created lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference
+     * object.
      * <p>
-     * The class where the index properties are searched for is determined by the first non-null element in the
-     * collection. Other than that, this is equivalent to {@link #create(Collection, Class, String, String)}.
+     * This is equivalent to {@link #create(Object, Collection, Class, String...) (Lookup&lt;Lookup&lt;T>>)
+     * create(defaultValue, values, clazz, new String[] &#123; property1, property2 &#125;)}.
      * 
+     * @param defaultValue
+     *            the default value to be used if the lookup object is not found
      * @param values
      *            a collection of objects that can be looked up.
+     * @param clazz
+     *            the class where the index property is searched for
      * @param property1
      *            the first index property
      * @param property2
@@ -300,10 +344,13 @@ public final class Lookups {
     }
 
     /**
-     * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
+     * Create multilevel lookup for objects in the given collection indexed by the properties defined on given class.The
+     * created lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference object.
      * 
+     * @param defaultValue
+     *            the default value to be used if the lookup object is not found
      * @param values
-     *            a collection of objects that can be looked up.
+     *            a collection of objects that can be looked up
      * @param clazz
      *            the class where the index property is searched for
      * @param properties
@@ -311,7 +358,7 @@ public final class Lookups {
      * 
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties in order
      */
     public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final Class<? extends T> clazz, final String... properties) {
