@@ -14,7 +14,7 @@
     </parent>
 
 	<name>lookup</name>
-	<url>http://maven.apache.org</url>
+	<url>http://kennethxu.github.io/lookup</url>
 
 		<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -34,9 +34,9 @@
         </license>
     </licenses>
     <scm>
-		<connection>scm:git:git@github.com:kennethxu/gm4java.git</connection>
-		<developerConnection>scm:git:git@github.com:kennethxu/gm4java.git</developerConnection>
-		<url>git@github.com:kennethxu/gm4java.git</url>
+		<connection>scm:git:git@github.com:kennethxu/lookup.git</connection>
+		<developerConnection>scm:git:git@github.com:kennethxu/lookup.git</developerConnection>
+		<url>git@github.com:kennethxu/lookup.git</url>
     </scm>
     <developers>
         <developer>
