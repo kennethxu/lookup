@@ -24,7 +24,7 @@ import javax.annotation.CheckForNull;
 class MapBasedLookup<T> extends AbstractLookup<T> {
     private final Map<? extends Object, ? extends T> map;
 
-    MapBasedLookup(@CheckForNull T defaultValue, final Map<? extends Object, ? extends T> map) {
+    MapBasedLookup(final Map<? extends Object, ? extends T> map, @CheckForNull T defaultValue) {
         super(defaultValue);
         this.map = map;
     }

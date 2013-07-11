@@ -6,6 +6,6 @@ class MultiLevelLookup<T extends Lookup<?>> extends MapBasedLookup<T> {
 
     @SuppressWarnings("unchecked")
     MultiLevelLookup(Map<? extends Object, ? extends T> map, int level) {
-        super((T) EmptyLookup.getChainAt(level), map);
+        super(map, (T) EmptyLookup.getChainAt(level));
     }
 }
