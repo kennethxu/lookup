@@ -32,10 +32,12 @@ final class LookupBuilder<T> {
 
     private final T defaultValue;
     private final Converter<T, Object>[] converters;
+    private final Lookup<?>[] chain;
 
     public LookupBuilder(@CheckForNull T defaultValue, final Converter<T, Object>[] converters) {
         this.defaultValue = defaultValue;
         this.converters = converters;
+        chain = buildChain();
     }
 
     public LookupBuilder(@CheckForNull T defaultValue, final Class<? extends T> clazz, final String... properties) {
@@ -49,10 +51,22 @@ final class LookupBuilder<T> {
         }
         this.defaultValue = defaultValue;
         this.converters = converters;
+        chain = buildChain();
     }
 
     public Lookup<?> build(final Collection<? extends T> values) {
         return build(values, 0);
+    }
+
+    private Lookup<?>[] buildChain() {
+        Lookup<?>[] chain = new Lookup<?>[converters.length];
+        Lookup<?> lookup = new EmptyLookup<T>(defaultValue);
+        chain[0] = lookup;
+        for (int i = 1; i < converters.length; i++) {
+            lookup = new EmptyLookup<Object>(lookup);
+            chain[i] = lookup;
+        }
+        return chain;
     }
 
     private Lookup<?> build(final Collection<? extends T> values, int index) {
@@ -76,7 +90,7 @@ final class LookupBuilder<T> {
             lookupMap.put(entry.getKey(), build(entry.getValue(), index));
         }
 
-        return new MultiLevelLookup<Lookup<?>>(lookupMap, converters.length - index - 1);
+        return new MapBasedLookup<Lookup<?>>(lookupMap, chain[converters.length - index - 1]);
     }
 
 }

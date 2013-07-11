@@ -28,11 +28,6 @@ import javax.annotation.CheckForNull;
  */
 public final class Lookups {
 
-    /**
-     * Lookup API supports no more than 10 levels of lookups.
-     */
-    public static final int LEVEL_LIMIT = 10;
-
     private Lookups() {
     }
 
