@@ -24,7 +24,7 @@ class PropertyConverter<TFrom> implements Converter<TFrom, Object> {
     private static final Class<?>[] empty = new Class[0];
     private final Method getter;
 
-    public PropertyConverter(final Class<TFrom> clazz, final String property) {
+    public PropertyConverter(final Class<? extends TFrom> clazz, final String property) {
         Method getter;
         try {
             final String capitalize = property.substring(0, 1).toUpperCase(ENGLISH) + property.substring(1);

@@ -19,15 +19,18 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.CheckForNull;
+
 class MapBasedLookup<T> extends AbstractLookup<T> {
     private final Map<? extends Object, ? extends T> map;
 
-    MapBasedLookup(final Map<? extends Object, ? extends T> map, T defaultValue) {
+    MapBasedLookup(@CheckForNull T defaultValue, final Map<? extends Object, ? extends T> map) {
         super(defaultValue);
         this.map = map;
     }
 
-    MapBasedLookup(final Collection<? extends T> values, T defaultValue, final Converter<T, Object> converter) {
+    MapBasedLookup(@CheckForNull T defaultValue, final Collection<? extends T> values,
+            final Converter<T, Object> converter) {
         super(defaultValue);
         final Map<Object, T> map = new HashMap<Object, T>();
         for (T value : values) {

@@ -15,10 +15,10 @@
  */
 package com.sharneng.lookup;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.CheckForNull;
 
 /**
  * Class to hold factory methods to return the implementation of {@link Lookup}.
@@ -41,21 +41,24 @@ public final class Lookups {
      * 
      * @param map
      *            the map to create the lookup
+     * 
      * @param <T>
      *            type of the reference object to be looked up
      * @return an implementation of {@link Lookup} that is backed by given map
      * 
      */
-    public static <T> Lookup<T> create(final Map<? extends Object, ? extends T> map) {
+    public static <T> Lookup<T> create(@CheckForNull T defaultValue, final Map<? extends Object, ? extends T> map) {
         if (map == null) throw new IllegalArgumentException(Utils.notNull("map"));
-        return new MapBasedLookup<T>(map, null);
+        return new MapBasedLookup<T>(defaultValue, map);
     }
+
+    /* values, string */
 
     /**
      * Create a lookup for objects in the given collection indexed by given property.
      * <p>
      * The class where the index property is searched for is determined by the first non-null element in the collection.
-     * Other than that, this is equivalent to {@link #create(Collection, Class, String)}.
+     * Other than that, this is equivalent to {@link #create(Class, Collection, String)}.
      * 
      * @param values
      *            a collection of objects that can be looked up.
@@ -68,14 +71,14 @@ public final class Lookups {
     public static <T> Lookup<T> create(final Collection<? extends T> values, final String property) {
         checkValues(values);
         if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
-        return create(values, getElementClass(values), property);
+        return new MapBasedLookup<T>(null, values, new PropertyConverter<T>(getElementClass(values), property));
     }
 
     /**
      * Create a two level lookup for objects in the given collection indexed by given properties.
      * <p>
      * The class where the index properties are searched for is determined by the first non-null element in the
-     * collection. Other than that, this is equivalent to {@link #create(Collection, Class, String, String)}.
+     * collection. Other than that, this is equivalent to {@link #create(Class, Collection, String, String)}.
      * 
      * @param values
      *            a collection of objects that can be looked up.
@@ -89,17 +92,14 @@ public final class Lookups {
      */
     public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final String property1,
             final String property2) {
-        final Lookup<?> lookup = create(values, new String[] { property1, property2 });
-        @SuppressWarnings("unchecked")
-        final Lookup<Lookup<T>> result = (Lookup<Lookup<T>>) lookup;
-        return result;
+        return Utils.toLookup2(create(values, new String[] { property1, property2 }));
     }
 
     /**
      * Create multilevel lookup for objects in the given collection indexed by given properties.
      * <p>
      * The class where the index properties are searched for is determined by the first non-null element in the
-     * collection. Other than that, it is equivalent to {@link #create(Collection, Class, String...)}.
+     * collection. Other than that, it is equivalent to {@link #create(Class, Collection, String...)}.
      * 
      * @param values
      *            a collection of objects that can be looked up.
@@ -111,36 +111,39 @@ public final class Lookups {
      */
     public static <T> Lookup<?> create(final Collection<? extends T> values, final String... properties) {
         checkValues(values);
-        return create(values, getElementClass(values), properties);
+        return new LookupBuilder<T>(null, getElementClass(values), properties).build(values);
     }
 
+    /* default, values, string */
+
     /**
-     * Create a {@link Lookup} for objects in the given collection indexed by given property defined on given class.
+     * Create a lookup for objects in the given collection indexed by given property.
+     * <p>
+     * The class where the index property is searched for is determined by the first non-null element in the collection.
+     * Other than that, this is equivalent to {@link #create(Class, Collection, String)}.
      * 
      * @param values
-     *            a collection of objects that can be looked up
-     * @param clazz
-     *            the class where the index property is searched for
+     *            a collection of objects that can be looked up.
      * @param property
      *            the index property
      * @param <T>
      *            type of the reference object to be looked up
      * @return an implementation of {@link Lookup} indexed by the specified property
      */
-    public static <T> Lookup<T> create(final Collection<? extends T> values, final Class<T> clazz, final String property) {
-        checkValues(values);
-        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
-        if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
-        return create(values, null, new PropertyConverter<T>(clazz, property));
+    public static <T> Lookup<T> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
+            final String property) {
+        return defaultValue != null ? create(Utils.getClass(defaultValue), defaultValue, values, property) : create(
+                values, property);
     }
 
     /**
-     * Create a two level lookup for objects in the given collection indexed by given properties defined on given class.
+     * Create a two level lookup for objects in the given collection indexed by given properties.
+     * <p>
+     * The class where the index properties are searched for is determined by the first non-null element in the
+     * collection. Other than that, this is equivalent to {@link #create(Class, Collection, String, String)}.
      * 
      * @param values
      *            a collection of objects that can be looked up.
-     * @param clazz
-     *            the class where the index property is searched for
      * @param property1
      *            the first index property
      * @param property2
@@ -149,102 +152,182 @@ public final class Lookups {
      *            type of the reference object to be looked up
      * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
      */
-    public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final Class<T> clazz,
+    public static <T> Lookup<Lookup<T>> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final String property1, final String property2) {
-        final Lookup<?> lookup = create(values, clazz, new String[] { property1, property2 });
-        @SuppressWarnings("unchecked")
-        final Lookup<Lookup<T>> result = (Lookup<Lookup<T>>) lookup;
-        return result;
+        return defaultValue != null ? create(Utils.getClass(defaultValue), defaultValue, values, property1, property2)
+                : create(values, property1, property2);
     }
 
     /**
      * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
      * 
+     * @param defaultValue
+     *            TODO the class where the index property is searched for
      * @param values
      *            a collection of objects that can be looked up.
-     * @param clazz
-     *            the class where the index property is searched for
      * @param properties
      *            the index properties
+     * 
      * @param <T>
      *            type of the reference object to be looked up
      * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
      */
-    public static <T> Lookup<?> create(final Collection<? extends T> values, final Class<T> clazz,
-            final String... properties) {
-        checkValues(values);
-        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
-        if (properties == null) throw new IllegalArgumentException(Utils.notNull("properties"));
-        if (properties.length == 0) throw new IllegalArgumentException("At least one property must be supplied");
-        @SuppressWarnings("unchecked")
-        final Converter<T, Object>[] converters = new Converter[properties.length];
-        for (int i = 0; i < properties.length; i++) {
-            if (properties[i] == null) throw new IllegalArgumentException(Utils.notNull("property" + (i + 1)));
-            converters[i] = new PropertyConverter<T>(clazz, properties[i]);
-        }
-        return createMultiLookup(values, null, 0, converters);
+    public static <T> Lookup<?> create(T defaultValue, final Collection<? extends T> values, final String... properties) {
+        return defaultValue != null ? create(Utils.getClass(defaultValue), defaultValue, values, properties) : create(
+                values, properties);
     }
 
-    static <T> Lookup<T> create(final Collection<? extends T> values, T defaultValue,
+    /* class, values, string */
+
+    /**
+     * Create a {@link Lookup} for objects in the given collection indexed by given property defined on given class.
+     * 
+     * @param clazz
+     *            the class where the index property is searched for
+     * @param values
+     *            a collection of objects that can be looked up
+     * @param property
+     *            the index property
+     * 
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of {@link Lookup} indexed by the specified property
+     */
+    public static <T> Lookup<T> create(final Class<? extends T> clazz, final Collection<? extends T> values,
+            final String property) {
+        return create(clazz, null, values, property);
+    }
+
+    /**
+     * Create a two level lookup for objects in the given collection indexed by given properties defined on given class.
+     * 
+     * @param clazz
+     *            the class where the index property is searched for
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param property1
+     *            the first index property
+     * @param property2
+     *            the second index property
+     * 
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
+     */
+    public static <T> Lookup<Lookup<T>> create(final Class<? extends T> clazz, final Collection<? extends T> values,
+            final String property1, final String property2) {
+        return create(clazz, null, values, property1, property2);
+    }
+
+    /**
+     * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
+     * 
+     * @param clazz
+     *            the class where the index property is searched for
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param properties
+     *            the index properties
+     * 
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     */
+    public static <T> Lookup<?> create(final Class<? extends T> clazz, final Collection<? extends T> values,
+            final String... properties) {
+        return create(clazz, null, values, properties);
+    }
+
+    /* class, default, values, string */
+
+    /**
+     * Create a lookup for objects in the given collection indexed by given property.
+     * <p>
+     * The class where the index property is searched for is determined by the first non-null element in the collection.
+     * Other than that, this is equivalent to {@link #create(Class, Collection, String)}.
+     * 
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param property
+     *            the index property
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of {@link Lookup} indexed by the specified property
+     */
+    public static <T> Lookup<T> create(final Class<? extends T> clazz, @CheckForNull T defaultValue,
+            final Collection<? extends T> values, final String property) {
+        checkValues(values);
+        if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
+        return new MapBasedLookup<T>(defaultValue, values, new PropertyConverter<T>(clazz, property));
+    }
+
+    /**
+     * Create a two level lookup for objects in the given collection indexed by given properties.
+     * <p>
+     * The class where the index properties are searched for is determined by the first non-null element in the
+     * collection. Other than that, this is equivalent to {@link #create(Class, Collection, String, String)}.
+     * 
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param property1
+     *            the first index property
+     * @param property2
+     *            the second index property
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
+     */
+    public static <T> Lookup<Lookup<T>> create(final Class<? extends T> clazz, @CheckForNull T defaultValue,
+            final Collection<? extends T> values, final String property1, final String property2) {
+        return Utils.toLookup2(create(clazz, defaultValue, values, new String[] { property1, property2 }));
+    }
+
+    /**
+     * Create multilevel lookup for objects in the given collection indexed by given properties defined on given class.
+     * 
+     * @param clazz
+     *            the class where the index property is searched for
+     * @param values
+     *            a collection of objects that can be looked up.
+     * @param properties
+     *            the index properties
+     * 
+     * @param <T>
+     *            type of the reference object to be looked up
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     */
+    public static <T> Lookup<?> create(final Class<? extends T> clazz, @CheckForNull T defaultValue,
+            final Collection<? extends T> values, final String... properties) {
+        checkValues(values);
+        return new LookupBuilder<T>(defaultValue, clazz, properties).build(values);
+    }
+
+    /* default, values, converter */
+
+    static <T> Lookup<T> create(T defaultValue, final Collection<? extends T> values,
             final Converter<T, Object> converter) {
         checkValues(values);
         if (converter == null) throw new IllegalArgumentException(Utils.notNull("converter"));
-        return createPrivate(values, defaultValue, converter);
+        return new MapBasedLookup<T>(defaultValue, values, converter);
     }
 
-    static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, T defaultValue,
+    static <T> Lookup<Lookup<T>> create(T defaultValue, final Collection<? extends T> values,
             final Converter<T, Object> converter1, final Converter<T, Object> converter2) {
-        @SuppressWarnings("unchecked")
-        Lookup<Lookup<T>> result = (Lookup<Lookup<T>>) create(values, new Converter[] { converter1, converter2 });
-        return result;
+        final Lookup<?> create = create(defaultValue, values, Utils.toGeneric(converter1, converter2));
+        return Utils.toLookup2(create);
     }
 
-    static <T> Lookup<?> create(final Collection<? extends T> values, T defaultValue,
+    static <T> Lookup<?> create(T defaultValue, final Collection<? extends T> values,
             final Converter<T, Object>... converters) {
         checkValues(values);
         checkConverters(converters);
-        return createMultiLookup(values, defaultValue, 0, converters);
+        return new LookupBuilder<T>(defaultValue, converters).build(values);
     }
 
     private static <T> Class<T> getElementClass(final Collection<? extends T> values) {
-        for (T value : values) {
-            if (value != null) {
-                @SuppressWarnings("unchecked")
-                final Class<T> clazz = (Class<T>) value.getClass();
-                return clazz;
-            }
-        }
+        for (T value : values)
+            if (value != null) return Utils.getClass(value);
         throw new IllegalArgumentException("Argument values collection must contain non-null element");
-    }
-
-    private static <T> Lookup<T> createPrivate(final Collection<? extends T> values, T defaultValue,
-            final Converter<T, Object> converter) {
-        return new MapBasedLookup<T>(values, defaultValue, converter);
-    }
-
-    private static <T> Lookup<?> createMultiLookup(final Collection<? extends T> values, T defaultValue, int index,
-            final Converter<T, Object>[] converters) {
-
-        Converter<T, Object> converter = converters[index];
-        if (++index == converters.length) return createPrivate(values, defaultValue, converter); // last one
-
-        Map<Object, Collection<T>> map = new HashMap<Object, Collection<T>>();
-        for (T value : values) {
-            Object key = converter.convert(value);
-            Collection<T> c = map.get(key);
-            if (c == null) {
-                c = new ArrayList<T>();
-                map.put(key, c);
-            }
-            c.add(value);
-        }
-
-        Map<Object, Lookup<?>> lookupMap = new HashMap<Object, Lookup<?>>();
-        for (Map.Entry<Object, Collection<T>> entry : map.entrySet()) {
-            lookupMap.put(entry.getKey(), createMultiLookup(entry.getValue(), defaultValue, index, converters));
-        }
-
-        return new MultiLevelLookup<Lookup<?>>(lookupMap, converters.length - index - 1);
     }
 
     private static void checkValues(final Collection<?> values) {
