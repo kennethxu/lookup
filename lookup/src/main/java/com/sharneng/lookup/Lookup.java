@@ -19,6 +19,8 @@ import javax.annotation.CheckForNull;
 
 /**
  * The primary interface to support lookup of a object by some index.
+ * <p>
+ * All methods in this interface must be thread safe.
  * 
  * @author Kenneth Xu
  * 
