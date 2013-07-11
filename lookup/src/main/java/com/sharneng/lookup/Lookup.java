@@ -62,7 +62,8 @@ public interface Lookup<T> {
      * @param key
      *            the key to lookup the object
      * @return the reference object found or a default value if not found
-     * @LookupException if failed to lookup the reference object and unable to provide a non {@code null} default value
+     * @exception LookupException
+     *                if failed to lookup the reference object and unable to provide a non {@code null} default value
      */
     T get(@CheckForNull Object key);
 
@@ -75,7 +76,8 @@ public interface Lookup<T> {
      * @param defaultValue
      *            the default value to be returned if object is not found
      * @return the reference object found or {@code defaultValue} if not found
-     * @IllegalArgumentException when {@code defaultValue} is {@code null}
+     * @exception IllegalArgumentException
+     *                when {@code defaultValue} is {@code null}
      */
     T get(@CheckForNull Object key, T defaultValue);
 
@@ -88,8 +90,10 @@ public interface Lookup<T> {
      * @param key
      *            the key to lookup the object
      * @return the reference object found
-     * @IllegalArgumentException when key is null
-     * @LookupException if failed to lookup the reference object
+     * @exception IllegalArgumentException
+     *                when key is null
+     * @exception LookupException
+     *                if failed to lookup the reference object
      */
     T hunt(@CheckForNull Object key);
 }

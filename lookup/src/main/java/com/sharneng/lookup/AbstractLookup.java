@@ -18,7 +18,7 @@ package com.sharneng.lookup;
 import javax.annotation.CheckForNull;
 
 /**
- * A convenient abstract class that helps to implement {@link Lookup&lt;T&gt;} interface.
+ * A convenient abstract class that helps to implement {@link Lookup Lookup&lt;T&gt;} interface.
  * 
  * @author Kenneth Xu
  * 
@@ -75,8 +75,8 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #find(Object, T)}. If the result is not null, return the result. Otherwise
-     * return the {@code defaultValue} passed to constructor.
+     * This implementation calls {@link #find(Object, Object) find(Object, T)}. If the result is not null, return the
+     * result. Otherwise return the {@code defaultValue} passed to constructor.
      */
     public T get(@CheckForNull final Object key) {
         final T result = find(key, defaultValue);
@@ -87,8 +87,8 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #find(Object, T)}. If the result is not null, return the result. Otherwise
-     * return the {@code defaultValue} parameter.
+     * This implementation calls {@link #find(Object, Object) find(Object, T)}. If the result is not null, return the
+     * result. Otherwise return the {@code defaultValue} parameter.
      */
     @Override
     public T get(@CheckForNull final Object key, final T defaultValue) {
