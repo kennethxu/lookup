@@ -30,19 +30,28 @@ import javax.annotation.CheckForNull;
 public interface Lookup<T> {
 
     /**
-     * Find and return the reference object by given key, or return a default value when the object is not found.
+     * Check if this lookup contains the reference object for given key.
+     * 
+     * @param key
+     *            the key to lookup the object
+     * @return {@code true} if the reference object for the key exists in this lookup. Otherwise {code false}.
+     */
+    boolean has(@CheckForNull Object key);
+
+    /**
+     * Find and return the reference object for given key, or return a default value when the object is not found.
      * <p>
      * The default value is implementation dependent and maybe null.
      * 
      * @param key
-     *            the key to lookup the object.
-     * @return the reference object found or a default value if not found.
+     *            the key to lookup the object
+     * @return the reference object found or a default value if not found
      */
     @CheckForNull
     T find(@CheckForNull Object key);
 
     /**
-     * Find and return the reference object by given key, or return the specified default value when the object is not
+     * Find and return the reference object for given key, or return the specified default value when the object is not
      * found.
      * 
      * @param key
@@ -55,7 +64,7 @@ public interface Lookup<T> {
     T find(@CheckForNull Object key, @CheckForNull T defaultValue);
 
     /**
-     * Find and return the reference object by given key, or return a default value when the object is not found.
+     * Find and return the reference object for given key, or return a default value when the object is not found.
      * <p>
      * The default value is implementation dependent and must not be {@code null}.
      * 
@@ -68,7 +77,7 @@ public interface Lookup<T> {
     T get(@CheckForNull Object key);
 
     /**
-     * Find and return the reference object by given key, or return the specified default value when the object is not
+     * Find and return the reference object for given key, or return the specified default value when the object is not
      * found.
      * 
      * @param key
@@ -82,10 +91,10 @@ public interface Lookup<T> {
     T get(@CheckForNull Object key, T defaultValue);
 
     /**
-     * Find and return the reference object by given key, or fail if one doesn't exist.
+     * Find and return the reference object for given key, or fail if one doesn't exist.
      * <p>
-     * {@code hunt} distinguish itself from {@code get} methods by throwing exception when the reference object cannot
-     * be found.
+     * {@code hunt} distinguish itself from {@code get} and {@code find} methods by throwing exception when the
+     * reference object cannot be found.
      * 
      * @param key
      *            the key to lookup the object

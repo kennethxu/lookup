@@ -11,6 +11,11 @@ class EmptyLookup<T> implements Lookup<T> {
     }
 
     @Override
+    public boolean has(Object key) {
+        return false;
+    }
+
+    @Override
     public T find(Object key) {
         return defaultValue;
     }

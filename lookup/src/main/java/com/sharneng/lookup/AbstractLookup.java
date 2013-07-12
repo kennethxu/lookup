@@ -18,7 +18,7 @@ package com.sharneng.lookup;
 import javax.annotation.CheckForNull;
 
 /**
- * A convenient abstract class that helps to implement {@link Lookup Lookup&lt;T&gt;} interface.
+ * A convenient abstract class that helps to implement {@link Lookup} interface.
  * 
  * @author Kenneth Xu
  * 
@@ -53,30 +53,45 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #lookup(Object)} if key is not null or otherwise return null.
+     * This implementation returns true if and only if {@code key} is not {@code null} and {@link #lookup(Object)
+     * lookup(key)} is not {@code null}.
+     */
+    @Override
+    public boolean has(@CheckForNull Object key) {
+        return key != null && lookup(key) != null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @return this implementation returns {@link #find(Object, Object) find(key, defaultValue)}, where the
+     *         {@code defaultValue} is the parameter passed to the constructor
      */
     @Override
     public T find(@CheckForNull final Object key) {
-        return key == null ? null : lookup(key);
+        return find(key, defaultValue);
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #find(Object)}. If the result is not null, return the result. Otherwise return
-     * the {@code defaultValue} parameter.
+     * This implementation returns {@code defaultValue} if the {@code key} is {@code null} or {@link #lookup(Object)
+     * lookup(key)} is {@code null}. Otherwise return the result of {@link #lookup(Object) lookup(key)}.
      */
     @Override
     public T find(@CheckForNull final Object key, @CheckForNull final T defaultValue) {
-        final T result = find(key);
-        return result == null ? (T) defaultValue : result;
+        final T result = key == null ? null : lookup(key);
+        return result == null ? defaultValue : result;
     }
 
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #find(Object, Object) find(Object, T)}. If the result is not null, return the
-     * result. Otherwise return the {@code defaultValue} passed to constructor.
+     * This implementation calls {@link #find(Object, Object) find(key, defaultValue)}, where the {@code defaultValue}
+     * is the parameter passed to the constructor. If the result is not {@code null}, return the result. Otherwise
+     * throws {@link LookupException}.
+     * 
+     * @return the reference object found or the {@code defaultValue} passed to the constructor if not found
      */
     public T get(@CheckForNull final Object key) {
         final T result = find(key, defaultValue);
@@ -87,8 +102,8 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     /**
      * {@inheritDoc}
      * <p>
-     * This implementation calls {@link #find(Object, Object) find(Object, T)}. If the result is not null, return the
-     * result. Otherwise return the {@code defaultValue} parameter.
+     * This implementation ensures the {@code defaultValue} is not null and then calls {@link #find(Object, Object)
+     * find(key, defaultValue)}.
      */
     @Override
     public T get(@CheckForNull final Object key, final T defaultValue) {
