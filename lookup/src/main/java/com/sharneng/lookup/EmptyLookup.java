@@ -39,7 +39,6 @@ class EmptyLookup<T> implements Lookup<T> {
 
     @Override
     public T hunt(Object key) {
-        key.toString();
-        throw Utils.notFoundException(key);
+        throw (key == null) ? new IllegalArgumentException(Utils.notNull("key")) : Utils.notFoundException(key);
     }
 }

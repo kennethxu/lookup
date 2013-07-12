@@ -26,10 +26,7 @@ class MapBasedLookup<T> extends AbstractLookup<T> {
 
     MapBasedLookup(final Map<? extends Object, ? extends T> map, @CheckForNull T defaultValue) {
         super(defaultValue);
-        final Map<Object, T> copy = new HashMap<Object, T>();
-        for (Map.Entry<? extends Object, ? extends T> pair : map.entrySet())
-            copy.put(pair.getKey(), pair.getValue());
-        this.map = copy;
+        this.map = new HashMap<Object, T>(map);
     }
 
     MapBasedLookup(@CheckForNull T defaultValue, final Collection<? extends T> values,
@@ -37,9 +34,15 @@ class MapBasedLookup<T> extends AbstractLookup<T> {
         super(defaultValue);
         final Map<Object, T> map = new HashMap<Object, T>();
         for (T value : values) {
-            map.put(converter.convert(value), value);
+            final Object key = converter.convert(value);
+            if (map.containsKey(key)) handleDuplicate(map.get(key), value, key);
+            map.put(key, value);
         }
         this.map = map;
+    }
+
+    protected void handleDuplicate(T oldValue, T newValue, Object key) {
+        throw new DuplicateKeyException(oldValue, newValue, key);
     }
 
     @Override

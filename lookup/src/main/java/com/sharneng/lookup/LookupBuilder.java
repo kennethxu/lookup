@@ -33,14 +33,24 @@ final class LookupBuilder<T> {
     private final T defaultValue;
     private final Converter<T, Object>[] converters;
     private final Lookup<?>[] chain;
+    private final Object[] keys;
 
     public LookupBuilder(@CheckForNull T defaultValue, final Converter<T, Object>[] converters) {
         this.defaultValue = defaultValue;
         this.converters = converters;
-        chain = buildChain();
+        this.chain = buildChain();
+        this.keys = new Object[converters.length];
     }
 
     public LookupBuilder(@CheckForNull T defaultValue, final Class<? extends T> clazz, final String... properties) {
+        this(defaultValue, toConverters(clazz, properties));
+    }
+
+    public Lookup<?> build(final Collection<? extends T> values) {
+        return build(values, 0);
+    }
+
+    private static <T> Converter<T, Object>[] toConverters(final Class<? extends T> clazz, final String... properties) {
         if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
         if (properties == null) throw new IllegalArgumentException(Utils.notNull("properties"));
         if (properties.length == 0) throw new IllegalArgumentException("At least one property must be supplied");
@@ -49,13 +59,7 @@ final class LookupBuilder<T> {
             if (properties[i] == null) throw new IllegalArgumentException(Utils.notNull("property" + (i + 1)));
             converters[i] = new PropertyConverter<T>(clazz, properties[i]);
         }
-        this.defaultValue = defaultValue;
-        this.converters = converters;
-        chain = buildChain();
-    }
-
-    public Lookup<?> build(final Collection<? extends T> values) {
-        return build(values, 0);
+        return converters;
     }
 
     private Lookup<?>[] buildChain() {
@@ -72,7 +76,12 @@ final class LookupBuilder<T> {
     private Lookup<?> build(final Collection<? extends T> values, int index) {
 
         Converter<T, Object> converter = converters[index];
-        if (++index == converters.length) return new MapBasedLookup<T>(defaultValue, values, converter); // last one
+        if (++index == converters.length) return new MapBasedLookup<T>(defaultValue, values, converter) {
+            protected void handleDuplicate(T oldValue, T newValue, Object key) {
+                keys[keys.length - 1] = key;
+                throw new DuplicateKeyException(newValue, oldValue, keys);
+            }
+        }; // last one
 
         Map<Object, Collection<T>> map = new HashMap<Object, Collection<T>>();
         for (T value : values) {
@@ -87,7 +96,9 @@ final class LookupBuilder<T> {
 
         Map<Object, Lookup<?>> lookupMap = new HashMap<Object, Lookup<?>>();
         for (Map.Entry<Object, Collection<T>> entry : map.entrySet()) {
-            lookupMap.put(entry.getKey(), build(entry.getValue(), index));
+            final Object key = entry.getKey();
+            keys[index - 1] = key;
+            lookupMap.put(key, build(entry.getValue(), index));
         }
 
         return new MapBasedLookup<Lookup<?>>(lookupMap, chain[converters.length - index - 1]);

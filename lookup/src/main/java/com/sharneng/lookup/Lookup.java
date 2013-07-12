@@ -104,5 +104,5 @@ public interface Lookup<T> {
      * @exception LookupException
      *                if failed to lookup the reference object
      */
-    T hunt(@CheckForNull Object key);
+    T hunt(Object key);
 }

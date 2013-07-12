@@ -16,46 +16,46 @@
 package com.sharneng.lookup;
 
 /**
- * Exception to indicate an error looking up a value from and instance of {@link Lookup}.
+ * Exception to indicate an error in building a lookup
  * <p>
  * This is made to be {@link RuntimeException} to simplify client's exception handling.
  * 
  * @author Kenneth Xu
  * 
  */
-public class LookupException extends RuntimeException {
+public class LookupBuildException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Construct a new {@code LookupException} with given error message.
+     * Construct a new {@code LookupBuildException} with given error message.
      * 
      * @param message
      *            the exception message
      */
-    public LookupException(final String message) {
+    public LookupBuildException(final String message) {
         super(message);
     }
 
     /**
-     * Construct a new {@code LookupException} from another exception as a cause of error.
+     * Construct a new {@code LookupBuildException} from another exception as a cause of error.
      * 
      * @param cause
      *            the cause of the error
      */
-    public LookupException(final Throwable cause) {
+    public LookupBuildException(final Throwable cause) {
         super(cause);
     }
 
     /**
-     * Construct a new {@code LookupException} with given message and another exception as the cause of error.
+     * Construct a new {@code LookupBuildException} with given message and another exception as the cause of error.
      * 
      * @param message
      *            the exception message
      * @param cause
      *            the cause of the error
      */
-    public LookupException(String message, Throwable cause) {
+    public LookupBuildException(String message, Throwable cause) {
         super(message, cause);
     }
 

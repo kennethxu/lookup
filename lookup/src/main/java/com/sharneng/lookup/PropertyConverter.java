@@ -38,7 +38,7 @@ class PropertyConverter<TFrom> implements Converter<TFrom, Object> {
                 }
             }
         } catch (NoSuchMethodException e) {
-            throw new LookupException("Unable to find getter for property " + property, e);
+            throw new LookupBuildException("Unable to find getter for property " + property, e);
         }
         this.getter = getter;
     }
@@ -47,9 +47,9 @@ class PropertyConverter<TFrom> implements Converter<TFrom, Object> {
         try {
             return source == null ? null : getter.invoke(source, (Object[]) null);
         } catch (IllegalAccessException e) {
-            throw new LookupException(e);
+            throw new LookupBuildException(e);
         } catch (InvocationTargetException e) {
-            throw new LookupException(e);
+            throw new LookupBuildException(e);
         }
     }
 
