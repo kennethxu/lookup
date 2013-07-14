@@ -15,6 +15,7 @@
  */
 package com.sharneng.lookup;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,7 +58,12 @@ final class LookupBuilder<T> {
         final Converter<T, Object>[] converters = Utils.toGeneric(new Converter[properties.length]);
         for (int i = 0; i < properties.length; i++) {
             if (properties[i] == null) throw new IllegalArgumentException(Utils.notNull("property" + (i + 1)));
-            converters[i] = new PropertyConverter<T>(clazz, properties[i]);
+        }
+        Method[] getters = new PropertyGetterFinder().findGetters(clazz, properties);
+        for (int i = 0; i < getters.length; i++) {
+            if (getters[i] == null) throw new LookupBuildException("Unable to find getter for property "
+                    + properties[i] + " on class " + clazz);
+            converters[i] = new PropertyConverter<T>(getters[i]);
         }
         return converters;
     }

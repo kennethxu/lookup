@@ -15,16 +15,29 @@
  */
 package com.sharneng.lookup;
 
-public class EmptyLookupTest {
+import static org.hamcrest.Matchers.*;
 
-    public static class WithDefault extends LookupWithDefaultNotFoundTest {
+public class EmptyLookupTest {
+    private static final String ARGUMENT_DEFAULT = "defaultParam";
+    private static final String INSTANCE_DEFAULT = "default";
+    private static final Object KEY = "key";
+
+    public static class WithDefault extends LookupWithDefaultNotFoundTest<String> {
+        public WithDefault() {
+            super(KEY, ARGUMENT_DEFAULT, equalTo(INSTANCE_DEFAULT));
+        }
+
         @Override
         protected Lookup<String> newLookup() {
-            return new EmptyLookup<String>(DEFAULT);
+            return new EmptyLookup<String>(INSTANCE_DEFAULT);
         }
     }
 
-    public static class WithoutDefault extends LookupWithoutDefaultNotFoundTest {
+    public static class WithoutDefault extends LookupWithoutDefaultNotFoundTest<String> {
+        public WithoutDefault() {
+            super(KEY, ARGUMENT_DEFAULT);
+        }
+
         @Override
         protected Lookup<String> newLookup() {
             return new EmptyLookup<String>(null);

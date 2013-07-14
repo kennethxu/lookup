@@ -35,7 +35,17 @@ public class DuplicateKeyException extends LookupBuildException {
      *            the set of keys resolving to tow or more different values
      */
     public DuplicateKeyException(Object value1, Object value2, Object... keys) {
-        // TODO fix this
-        super(value1.toString());
+        super(buildMessage(value1, value2, keys));
+    }
+
+    private static String buildMessage(Object value1, Object value2, Object[] keys) {
+        StringBuilder sb = new StringBuilder("Duplicated key ");
+        if (keys.length > 1) sb.append("set ");
+        sb.append(keys[0]);
+        for (int i = 1; i < keys.length; i++) {
+            sb.append(", ").append(keys[i]);
+        }
+        sb.append(" for object ").append(value1).append(" and ").append(value2);
+        return sb.toString();
     }
 }

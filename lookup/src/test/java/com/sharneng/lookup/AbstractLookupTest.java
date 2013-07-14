@@ -15,12 +15,23 @@
  */
 package com.sharneng.lookup;
 
+import static org.hamcrest.Matchers.*;
+
 public class AbstractLookupTest {
 
-    public static class WithDefaultFound extends LookupWithDefaultFoundTest {
+    private static final String ARGUMENT_DEFAULT = "defaultParam";
+    private static final String FOUND = "found";
+    private static final String INSTANCE_DEFAULT = "default";
+    private static final Object KEY = "key";
+
+    public static class WithDefaultFound extends LookupWithDefaultFoundTest<String> {
+        public WithDefaultFound() {
+            super(KEY, ARGUMENT_DEFAULT, equalTo(INSTANCE_DEFAULT), equalTo(FOUND));
+        }
+
         @Override
         protected Lookup<String> newLookup() {
-            return new AbstractLookup<String>(DEFAULT) {
+            return new AbstractLookup<String>(INSTANCE_DEFAULT) {
                 @Override
                 protected String lookup(Object key) {
                     return FOUND;
@@ -29,10 +40,14 @@ public class AbstractLookupTest {
         }
     }
 
-    public static class WithDefaultNotFound extends LookupWithDefaultNotFoundTest {
+    public static class WithDefaultNotFound extends LookupWithDefaultNotFoundTest<String> {
+        public WithDefaultNotFound() {
+            super(KEY, ARGUMENT_DEFAULT, equalTo(INSTANCE_DEFAULT));
+        }
+
         @Override
         protected Lookup<String> newLookup() {
-            return new AbstractLookup<String>(DEFAULT) {
+            return new AbstractLookup<String>(INSTANCE_DEFAULT) {
                 @Override
                 protected String lookup(Object key) {
                     return null;
@@ -41,7 +56,11 @@ public class AbstractLookupTest {
         }
     }
 
-    public static class WithoutDefaultFound extends LookupWithoutDefaultFoundTest {
+    public static class WithoutDefaultFound extends LookupWithoutDefaultFoundTest<String> {
+        public WithoutDefaultFound() {
+            super(KEY, ARGUMENT_DEFAULT, equalTo(FOUND));
+        }
+
         @Override
         protected Lookup<String> newLookup() {
             return new AbstractLookup<String>(null) {
@@ -53,7 +72,11 @@ public class AbstractLookupTest {
         }
     }
 
-    public static class WithoutDefaultNotFound extends LookupWithoutDefaultNotFoundTest {
+    public static class WithoutDefaultNotFound extends LookupWithoutDefaultNotFoundTest<String> {
+        public WithoutDefaultNotFound() {
+            super(KEY, ARGUMENT_DEFAULT);
+        }
+
         @Override
         protected Lookup<String> newLookup() {
             return new AbstractLookup<String>(null) {

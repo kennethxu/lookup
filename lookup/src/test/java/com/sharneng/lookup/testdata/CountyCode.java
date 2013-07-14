@@ -11,6 +11,7 @@ import java.util.List;
  * 
  */
 public class CountyCode {
+    public static final CountyCode DEFAULT = new CountyCode(0, null, null);
 
     private final int code;
     private final String state;
@@ -32,6 +33,32 @@ public class CountyCode {
 
     public String getCounty() {
         return county;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + code;
+        result = prime * result + ((county == null) ? 0 : county.hashCode());
+        result = prime * result + ((state == null) ? 0 : state.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        CountyCode other = (CountyCode) obj;
+        if (code != other.code) return false;
+        if (county == null) {
+            if (other.county != null) return false;
+        } else if (!county.equals(other.county)) return false;
+        if (state == null) {
+            if (other.state != null) return false;
+        } else if (!state.equals(other.state)) return false;
+        return true;
     }
 
     public static final List<CountyCode> codes;

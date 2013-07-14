@@ -21,84 +21,92 @@ import static org.hamcrest.Matchers.nullValue;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
 
+import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public abstract class LookupWithDefaultFoundTest {
+public abstract class LookupWithDefaultFoundTest<T> {
 
-    protected static final String DEFAULT_PARAM = "defaultParam";
-    protected static final String FOUND = "found";
-    protected static final String DEFAULT = "default";
-    protected static final String KEY = "key";
+    private final T argumentDefault;
+    private final Matcher<T> foundMatcher;
+    private final Matcher<T> defaultMatcher;
+    private final Object key;
+
+    protected LookupWithDefaultFoundTest(Object key, T argumentDefault, Matcher<T> defaultMatcher, Matcher<T> foundMatcher) {
+        this.key = key;
+        this.argumentDefault = argumentDefault;
+        this.defaultMatcher = defaultMatcher;
+        this.foundMatcher = foundMatcher;
+    }
 
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    protected abstract Lookup<String> newLookup();
+    protected abstract Lookup<T> newLookup();
 
     @Test
     public void has_returnsTrue_whenFound() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.has(KEY), equalTo(true));
+        assertThat(lookup.has(key), equalTo(true));
     }
 
     @Test
     public void has_returnsFalse_onNullKey() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
         assertThat(lookup.has(null), equalTo(false));
     }
 
     @Test
     public void find_returnsValue_whenFound() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.find(KEY), equalTo(FOUND));
+        assertThat(lookup.find(key), foundMatcher);
     }
 
     @Test
     public void find_returnsConstructorDefault_onNullKey() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.find(null), equalTo(DEFAULT));
+        assertThat(lookup.find(null), defaultMatcher);
     }
 
     @Test
     public void findWithDefault_returnsValue_whenFound() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.find(KEY, null), equalTo(FOUND));
-        assertThat(lookup.find(KEY, "d"), equalTo(FOUND));
+        assertThat(lookup.find(key, null), foundMatcher);
+        assertThat(lookup.find(key, argumentDefault), foundMatcher);
     }
 
     @Test
     public void findWithDefault_returnsDefaultParam_onNullKey() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
         assertThat(lookup.find(null, null), nullValue());
-        assertThat(lookup.find(null, DEFAULT_PARAM), equalTo(DEFAULT_PARAM));
+        assertThat(lookup.find(null, argumentDefault), equalTo(argumentDefault));
     }
 
     @Test
     public void get_returnsValue_whenFound() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.get(KEY), equalTo(FOUND));
+        assertThat(lookup.get(key), foundMatcher);
     }
 
     @Test
     public void get_returnsConstructorDefault_onNullKey() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.get(null), equalTo(DEFAULT));
+        assertThat(lookup.get(null), defaultMatcher);
     }
 
     @Test
     @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void getWithDefault_Chokes_onNullDefaultParam() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
         exception.expect(IllegalArgumentException.class);
 
         lookup.get("d", null);
@@ -106,22 +114,22 @@ public abstract class LookupWithDefaultFoundTest {
 
     @Test
     public void getWithDefault_returnsValue_whenFound() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.get(KEY, "d"), equalTo(FOUND));
+        assertThat(lookup.get(key, argumentDefault), foundMatcher);
     }
 
     @Test
     public void getWithDefault_returnsDefaultParam_onNullKey() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.get(null, DEFAULT_PARAM), equalTo(DEFAULT_PARAM));
+        assertThat(lookup.get(null, argumentDefault), equalTo(argumentDefault));
     }
 
     @Test
     @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void hunt_Chokes_onNullKeyWithDefault() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
         exception.expect(IllegalArgumentException.class);
 
         lookup.hunt(null);
@@ -129,9 +137,9 @@ public abstract class LookupWithDefaultFoundTest {
 
     @Test
     public void hunt_returnsValue_whenFound() {
-        Lookup<String> lookup = newLookup();
+        Lookup<T> lookup = newLookup();
 
-        assertThat(lookup.hunt(KEY), equalTo(FOUND));
+        assertThat(lookup.hunt(key), foundMatcher);
     }
 
 }
