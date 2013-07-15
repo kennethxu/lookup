@@ -3,38 +3,11 @@ package com.sharneng.lookup;
 import static org.hamcrest.Matchers.*;
 
 import com.sharneng.lookup.testdata.CountyCode;
+import com.sharneng.lookup.testdata.LookupMatcher;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
 public class LookupBuilderMultiKeyTest {
-
-    private static class LookupMatcher extends BaseMatcher<Lookup<CountyCode>> {
-        private final Object key;
-        private final CountyCode value;
-        private final String description;
-
-        public LookupMatcher(Object key, CountyCode value, String description) {
-            this.key = key;
-            this.value = value;
-            this.description = description;
-        }
-
-        @Override
-        public boolean matches(Object item) {
-            if (!(item instanceof Lookup<?>)) return false;
-            @SuppressWarnings("unchecked")
-            Lookup<CountyCode> lookup = (Lookup<CountyCode>) item;
-            return (lookup.get(key).equals(value));
-        }
-
-        @Override
-        public void describeTo(Description description) {
-            description.appendText(this.description);
-        }
-
-    }
 
     private static final Lookup<CountyCode> argumentDefault = new EmptyLookup<CountyCode>(CountyCode.DEFAULT);
     private static final CountyCode found = new CountyCode(1081, "Alabama", "Lee");

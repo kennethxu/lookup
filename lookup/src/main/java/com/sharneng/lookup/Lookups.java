@@ -187,8 +187,7 @@ public final class Lookups {
      */
     public static <T> Lookup<Lookup<T>> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final String property1, final String property2) {
-        return defaultValue != null ? create(defaultValue, values, Utils.getClass(defaultValue), property1, property2)
-                : create(values, property1, property2);
+        return Utils.toLookup2(create(defaultValue, values, new String[] { property1, property2 }));
     }
 
     /**
@@ -307,6 +306,7 @@ public final class Lookups {
             final Class<? extends T> clazz, final String property) {
         checkValues(values);
         if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
+        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
         return new MapBasedLookup<T>(defaultValue, values, new PropertyConverter<T>(clazz, property));
     }
 
@@ -372,8 +372,7 @@ public final class Lookups {
 
     static <T> Lookup<Lookup<T>> create(T defaultValue, final Collection<? extends T> values,
             final Converter<T, Object> converter1, final Converter<T, Object> converter2) {
-        final Lookup<?> create = create(defaultValue, values, Utils.toGeneric(converter1, converter2));
-        return Utils.toLookup2(create);
+        return Utils.toLookup2(create(defaultValue, values, Utils.toGeneric(converter1, converter2)));
     }
 
     static <T> Lookup<?> create(T defaultValue, final Collection<? extends T> values,
