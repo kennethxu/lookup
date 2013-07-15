@@ -212,7 +212,8 @@ public final class Lookups {
      *            type of the reference object to be looked up
      * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
      */
-    public static <T> Lookup<?> create(T defaultValue, final Collection<? extends T> values, final String... properties) {
+    public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
+            final String... properties) {
         return defaultValue != null ? create(defaultValue, values, Utils.getClass(defaultValue), properties) : create(
                 values, properties);
     }

@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.*;
 import com.sharneng.lookup.testdata.CountyCode;
 import com.sharneng.lookup.testdata.LookupMatcher;
 
+import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+
 import org.hamcrest.Matcher;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
 public class LookupsMultiKeyTest {
     private static final Lookup<CountyCode> argumentDefault = new EmptyLookup<CountyCode>(CountyCode.DEFAULT);
     private static final CountyCode found = new CountyCode(1081, "Alabama", "Lee");
