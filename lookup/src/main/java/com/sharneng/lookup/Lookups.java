@@ -15,6 +15,10 @@
  */
 package com.sharneng.lookup;
 
+import com.sharneng.lookup.fluent.Indexed;
+import com.sharneng.lookup.fluent.Sourced;
+import com.sharneng.lookup.fluent.Defined;
+
 import java.util.Collection;
 import java.util.Map;
 
@@ -27,6 +31,53 @@ import javax.annotation.CheckForNull;
  * 
  */
 public final class Lookups {
+
+    public static <T> Sourced<T, T> from(Collection<? extends T> values) {
+        PrivateBuilder<T> collector = new PrivateBuilder<T>();
+        collector.values = values;
+        return collector;
+    }
+
+    private static class PrivateBuilder<T> implements Sourced<T, T>, Indexed<T> {
+        private T defaultValue;
+        private Collection<? extends T> values;
+        private Class<? extends T> clazz;
+
+        public Sourced<T, T> defaultTo(T defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public Sourced<T, T> of(Class<? extends T> clazz) {
+            this.clazz = clazz;
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public <Q> Sourced<T, Q> select(String property) {
+            return (Sourced<T, Q>) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        public Indexed<Lookup<T>> by(String property) {
+            return (Indexed<Lookup<T>>) this;
+        }
+
+        public T index() {
+            return null;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Defined<Lookup<?>> by(String... properties) {
+            return (Defined<Lookup<?>>) this;
+        }
+
+        @Override
+        public Sourced<T, T> unqiue() {
+            return this;
+        }
+    }
 
     private Lookups() {
     }
