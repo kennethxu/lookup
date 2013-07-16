@@ -64,7 +64,7 @@ final class LookupBuilder<T> {
     private Lookup<?> build(final Collection<? extends T> values, int index) {
 
         Converter<T, Object> converter = converters[index];
-        if (++index == converters.length) return new MapBasedLookup<T>(defaultValue, values, converter) {
+        if (++index == converters.length) return new MapBasedLookup<T, T>(defaultValue, values, converter) {
             protected void handleDuplicate(T oldValue, T newValue, Object key) {
                 keys[keys.length - 1] = key;
                 throw new DuplicateKeyException(newValue, oldValue, keys);
@@ -89,7 +89,7 @@ final class LookupBuilder<T> {
             lookupMap.put(key, build(entry.getValue(), index));
         }
 
-        return new MapBasedLookup<Lookup<?>>(lookupMap, chain[converters.length - index - 1]);
+        return new MapBasedLookup<Lookup<?>, Lookup<?>>(lookupMap, chain[converters.length - index - 1]);
     }
 
 }

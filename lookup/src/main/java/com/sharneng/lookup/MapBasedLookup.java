@@ -21,7 +21,7 @@ import java.util.Map;
 
 import javax.annotation.CheckForNull;
 
-class MapBasedLookup<T> extends AbstractLookup<T> {
+class MapBasedLookup<E, T> extends AbstractLookup<T> {
     private final Map<? extends Object, ? extends T> map;
 
     MapBasedLookup(final Map<? extends Object, ? extends T> map, @CheckForNull T defaultValue) {
@@ -29,16 +29,21 @@ class MapBasedLookup<T> extends AbstractLookup<T> {
         this.map = new HashMap<Object, T>(map);
     }
 
-    MapBasedLookup(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final Converter<T, Object> converter) {
+    MapBasedLookup(@CheckForNull T defaultValue, final Collection<? extends E> values,
+            final Converter<E, Object> converter) {
         super(defaultValue);
         final Map<Object, T> map = new HashMap<Object, T>();
-        for (T value : values) {
-            final Object key = converter.convert(value);
+        for (E e : values) {
+            T value = toT(e);
+            final Object key = converter.convert(e);
             if (map.containsKey(key)) handleDuplicate(map.get(key), value, key);
             map.put(key, value);
         }
         this.map = map;
+    }
+
+    private T toT(E e) {
+        return (T) e; // TODO: this need a converter
     }
 
     protected void handleDuplicate(T oldValue, T newValue, Object key) {

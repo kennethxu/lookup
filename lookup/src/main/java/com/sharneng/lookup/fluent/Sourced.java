@@ -30,5 +30,5 @@ public interface Sourced<T, P> extends Selected<T, P> {
 
     Sourced<T, P> unqiue();
 
-    <Q> Selected<T, Q> select(String property);
+    <Q> Selected<T, Q> select(String property, Class<Q> clazz);
 }

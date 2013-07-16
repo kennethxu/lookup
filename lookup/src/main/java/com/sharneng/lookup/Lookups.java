@@ -35,52 +35,52 @@ import javax.annotation.CheckForNull;
 public final class Lookups {
 
     public static <T> Sourced<T, T> from(Collection<? extends T> values) {
-        PrivateBuilder<T> collector = new PrivateBuilder<T>();
-        collector.values = values;
-        return collector;
+        return new PrivateBuilder<T, T>(values);
     }
 
-    private static class PrivateBuilder<T> implements Sourced<T, T>, Indexed<T> {
-        private T defaultValue;
-        private Collection<? extends T> values;
-        private Class<? extends T> clazz;
-        private List<String> properties = new ArrayList<String>();
+    private static class PrivateBuilder<E, T> implements Sourced<E, T>, Indexed<T> {
+        private final FluentBuilder<E, T> fb;
 
-        public Sourced<T, T> defaultTo(T defaultValue) {
-            this.defaultValue = defaultValue;
+        public PrivateBuilder(Collection<? extends E> source) {
+            fb = new FluentBuilder<E, T>(source);
+        }
+
+        public Sourced<E, T> defaultTo(T defaultValue) {
+            fb.setDefaultValue(defaultValue);
             return this;
         }
 
-        public Sourced<T, T> of(Class<? extends T> clazz) {
-            this.clazz = clazz;
+        public Sourced<E, T> of(Class<? extends E> clazz) {
+            fb.setSourceClass(clazz);
             return this;
         }
 
         @SuppressWarnings("unchecked")
-        public <Q> Sourced<T, Q> select(String property) {
-            return (Sourced<T, Q>) this;
+        public <Q> Sourced<E, Q> select(String property, Class<Q> clazz) {
+            fb.addSelect(property, (Class<T>) clazz);
+            return (Sourced<E, Q>) this;
         }
 
         @SuppressWarnings("unchecked")
         public Indexed<Lookup<T>> by(String property) {
-            properties.add(property);
+            fb.addIndex(property);
             return (Indexed<Lookup<T>>) this;
         }
 
         public T index() {
-            return (T) create(defaultValue, values, clazz, properties.toArray(new String[properties.size()]));
+            return (T) fb.build();
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public Defined<Lookup<?>> by(String... properties) {
             for (String s : properties)
-                this.properties.add(s);
+                fb.addIndex(s);
             return (Defined<Lookup<?>>) this;
         }
 
         @Override
-        public Sourced<T, T> unqiue() {
+        public Sourced<E, T> unqiue() {
             return this;
         }
     }
@@ -124,7 +124,7 @@ public final class Lookups {
      */
     public static <T> Lookup<T> create(final Map<? extends Object, ? extends T> map, @CheckForNull T defaultValue) {
         if (map == null) throw new IllegalArgumentException(Utils.notNull("map"));
-        return new MapBasedLookup<T>(map, defaultValue);
+        return new MapBasedLookup<T, T>(map, defaultValue);
     }
 
     /* values, string */
@@ -146,7 +146,7 @@ public final class Lookups {
     public static <T> Lookup<T> create(final Collection<? extends T> values, final String property) {
         checkValues(values);
         if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
-        return new MapBasedLookup<T>(null, values, new PropertyConverter<T>(getElementClass(values), property));
+        return new MapBasedLookup<T, T>(null, values, new PropertyConverter<T>(getElementClass(values), property));
     }
 
     /**
@@ -365,7 +365,7 @@ public final class Lookups {
         checkValues(values);
         if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
         if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
-        return new MapBasedLookup<T>(defaultValue, values, new PropertyConverter<T>(clazz, property));
+        return new MapBasedLookup<T, T>(defaultValue, values, new PropertyConverter<T>(clazz, property));
     }
 
     /**
@@ -425,7 +425,7 @@ public final class Lookups {
             final Converter<T, Object> converter) {
         checkValues(values);
         if (converter == null) throw new IllegalArgumentException(Utils.notNull("converter"));
-        return new MapBasedLookup<T>(defaultValue, values, converter);
+        return new MapBasedLookup<T, T>(defaultValue, values, converter);
     }
 
     static <T> Lookup<Lookup<T>> create(T defaultValue, final Collection<? extends T> values,
