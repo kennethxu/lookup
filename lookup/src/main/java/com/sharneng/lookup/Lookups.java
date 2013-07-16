@@ -19,7 +19,9 @@ import com.sharneng.lookup.fluent.Indexed;
 import com.sharneng.lookup.fluent.Sourced;
 import com.sharneng.lookup.fluent.Defined;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.CheckForNull;
@@ -42,6 +44,7 @@ public final class Lookups {
         private T defaultValue;
         private Collection<? extends T> values;
         private Class<? extends T> clazz;
+        private List<String> properties = new ArrayList<String>();
 
         public Sourced<T, T> defaultTo(T defaultValue) {
             this.defaultValue = defaultValue;
@@ -60,16 +63,19 @@ public final class Lookups {
 
         @SuppressWarnings("unchecked")
         public Indexed<Lookup<T>> by(String property) {
+            properties.add(property);
             return (Indexed<Lookup<T>>) this;
         }
 
         public T index() {
-            return null;
+            return (T) create(defaultValue, values, clazz, properties.toArray(new String[properties.size()]));
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public Defined<Lookup<?>> by(String... properties) {
+            for (String s : properties)
+                this.properties.add(s);
             return (Defined<Lookup<?>>) this;
         }
 

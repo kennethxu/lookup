@@ -15,7 +15,6 @@
  */
 package com.sharneng.lookup;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -44,28 +43,11 @@ final class LookupBuilder<T> {
     }
 
     public LookupBuilder(@CheckForNull T defaultValue, final Class<? extends T> clazz, final String... properties) {
-        this(defaultValue, toConverters(clazz, properties));
+        this(defaultValue, Utils.toConverters(clazz, properties));
     }
 
     public Lookup<?> build(final Collection<? extends T> values) {
         return build(values, 0);
-    }
-
-    private static <T> Converter<T, Object>[] toConverters(final Class<? extends T> clazz, final String... properties) {
-        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
-        if (properties == null) throw new IllegalArgumentException(Utils.notNull("properties"));
-        if (properties.length == 0) throw new IllegalArgumentException("At least one property must be supplied");
-        final Converter<T, Object>[] converters = Utils.toGeneric(new Converter[properties.length]);
-        for (int i = 0; i < properties.length; i++) {
-            if (properties[i] == null) throw new IllegalArgumentException(Utils.notNull("property" + (i + 1)));
-        }
-        Method[] getters = new PropertyGetterFinder().findGetters(clazz, properties);
-        for (int i = 0; i < getters.length; i++) {
-            if (getters[i] == null) throw new LookupBuildException("Unable to find getter for property "
-                    + properties[i] + " on class " + clazz);
-            converters[i] = new PropertyConverter<T>(getters[i]);
-        }
-        return converters;
     }
 
     private Lookup<?>[] buildChain() {
