@@ -15,13 +15,9 @@
  */
 package com.sharneng.lookup;
 
-import com.sharneng.lookup.fluent.Indexed;
 import com.sharneng.lookup.fluent.Sourced;
-import com.sharneng.lookup.fluent.Defined;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.CheckForNull;
@@ -36,72 +32,7 @@ public final class Lookups {
 
     public static <T> Sourced<T, T> from(Collection<? extends T> source) {
         checkValues(source);
-        LookupBuilder<T, T> builder = new LookupBuilder<T, T>(source);
-        return new PrivateBuilder<T, T>(builder);
-    }
-
-    private static class PrivateBuilder<E, T> implements Sourced<E, T>, Indexed<E, T> {
-        private final LookupBuilder<E, T> builder;
-
-        public PrivateBuilder(LookupBuilder<E, T> builder) {
-            this.builder = builder;
-        }
-
-        public Sourced<E, T> defaultTo(@CheckForNull T defaultValue) {
-            builder.setDefaultValue(defaultValue);
-            return this;
-        }
-
-        @SuppressWarnings("unchecked")
-        public <Q> Sourced<E, Q> select(String expression, Class<Q> clazz) {
-            builder.select((Class<T>) clazz, expression);
-            return (Sourced<E, Q>) this;
-        }
-
-        @SuppressWarnings("unchecked")
-        public Indexed<E, Lookup<T>> by(String expression) {
-            builder.addIndex(expression);
-            return (Indexed<E, Lookup<T>>) this;
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public Indexed<E, Lookup<T>> by(Converter<E, Object> converter) {
-            builder.addIndex(converter);
-            return (Indexed<E, Lookup<T>>) this;
-        }
-
-        public T index() {
-            return (T) builder.build();
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public Defined<Lookup<?>> by(String... properties) {
-            for (String s : properties)
-                builder.addIndex(s);
-            return (Defined<Lookup<?>>) this;
-        }
-
-        @Override
-        public Defined<Lookup<?>> by(Converter<E, Object>... converters) {
-            for (Converter<E, Object> converter : converters)
-                builder.addIndex(converter);
-            return (Defined<Lookup<?>>) this;
-        }
-
-        @Override
-        public Sourced<E, T> useFirstWhenDuplication() {
-            builder.useFirstWhenDuplication();
-            return this;
-        }
-
-        @Override
-        public Sourced<E, T> useLastWhenDuplication() {
-            builder.useLastWhenDuplication();
-            return this;
-        }
-
+        return new LookupBuilder<T, T>(source);
     }
 
     private Lookups() {

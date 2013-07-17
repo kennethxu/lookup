@@ -18,10 +18,7 @@ public class LookupBuilderMultiKeyTest {
 
     private static Lookup<Lookup<CountyCode>> newDoubleKeyLookup(CountyCode instanceDefault) {
         LookupBuilder<CountyCode, CountyCode> builder = new LookupBuilder<CountyCode, CountyCode>(CountyCode.codes);
-        builder.setDefaultValue(instanceDefault);
-        builder.addIndex("state");
-        builder.addIndex("county");
-        return Utils.toLookup2(builder.build());
+        return builder.defaultTo(instanceDefault).by("state").by("county").index();
     }
 
     public static class FirstLevelFound extends LookupWithDefaultFoundTest<Lookup<CountyCode>> {

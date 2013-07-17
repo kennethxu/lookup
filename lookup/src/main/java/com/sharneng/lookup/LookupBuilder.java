@@ -15,6 +15,10 @@
  */
 package com.sharneng.lookup;
 
+import com.sharneng.lookup.fluent.Defined;
+import com.sharneng.lookup.fluent.Indexed;
+import com.sharneng.lookup.fluent.Sourced;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,7 +33,7 @@ import javax.annotation.CheckForNull;
  * @author Kenneth Xu
  * 
  */
-final class LookupBuilder<E, T> {
+final class LookupBuilder<E, T> implements Sourced<E, T>, Indexed<E, T> {
     private enum Duplication {
         FIRST,
         LAST,
@@ -52,39 +56,62 @@ final class LookupBuilder<E, T> {
         this.source = source;
     }
 
-    public void setDefaultValue(@CheckForNull T defaultValue) {
+    public Sourced<E, T> defaultTo(@CheckForNull T defaultValue) {
         this.defaultValue = defaultValue;
+        return this;
     }
 
-    public void select(Class<T> clazz, String expression) {
-        select(new OgnlConverter<E, T>(clazz, expression));
+    public <Q> Sourced<E, Q> select(Class<Q> clazz, String expression) {
+        return select(new OgnlConverter<E, Q>(clazz, expression));
     }
 
-    public void select(Converter<E, T> converter) {
-        selectConverter = converter;
+    @Override
+    public <Q> Sourced<E, Q> select(Converter<E, Q> converter) {
+        final LookupBuilder<E, Q> that = Utils.<LookupBuilder<E, Q>> cast(this);
+        that.selectConverter = converter;
+        return that;
     }
 
-    public void addIndex(Converter<E, Object> converter) {
+    public Indexed<E, Lookup<T>> by(Converter<E, Object> converter) {
         converters.add(converter);
+        return Utils.<Indexed<E, Lookup<T>>> cast(this);
     }
 
-    public void addIndex(String property) {
-        addIndex(new OgnlConverter<E, Object>(Object.class, property));
+    public Indexed<E, Lookup<T>> by(String property) {
+        return by(new OgnlConverter<E, Object>(Object.class, property));
     }
 
-    public void useFirstWhenDuplication() {
+    @SuppressWarnings("unchecked")
+    @Override
+    public Defined<Lookup<?>> by(String... properties) {
+        for (String s : properties)
+            by(s);
+        return (Defined<Lookup<?>>) this;
+    }
+
+    @Override
+    public Defined<Lookup<?>> by(Converter<E, Object>... converters) {
+        for (Converter<E, Object> converter : converters)
+            by(converter);
+        return (Defined<Lookup<?>>) this;
+    }
+
+    public Sourced<E, T> useFirstWhenDuplication() {
         duplication = Duplication.FIRST;
+        return this;
     }
 
-    public void useLastWhenDuplication() {
+    public Sourced<E, T> useLastWhenDuplication() {
         duplication = Duplication.LAST;
+        return this;
     }
 
-    public Lookup<?> build() {
+    // public Lookup<?> index() {
+    public T index() {
         keyCount = converters.size();
         this.chain = buildChain();
         this.keys = new Object[keyCount];
-        return keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0));
+        return (T) (keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0)));
     }
 
     private Lookup<?>[] buildChain() {

@@ -15,20 +15,24 @@
  */
 package com.sharneng.lookup.fluent;
 
+import com.sharneng.lookup.Converter;
+
 /**
  * Represent a stage of the fluent API that the source data is provided for building a
  * {@link com.sharneng.lookup.Lookup} instance.
  * 
  * @author Kenneth Xu
  * 
+ * @param <E>
  * @param <T>
- * @param <P>
  */
-public interface Sourced<T, P> extends Selected<T, P> {
+public interface Sourced<E, T> extends Selected<E, T> {
 
-    Sourced<T, P> useFirstWhenDuplication();
+    Sourced<E, T> useFirstWhenDuplication();
 
-    Sourced<T, P> useLastWhenDuplication();
+    Sourced<E, T> useLastWhenDuplication();
 
-    <Q> Selected<T, Q> select(String property, Class<Q> clazz);
+    <Q> Selected<E, Q> select(Class<Q> clazz, String property);
+
+    <Q> Sourced<E, Q> select(Converter<E, Q> converter);
 }

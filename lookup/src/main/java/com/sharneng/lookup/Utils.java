@@ -18,19 +18,9 @@ final class Utils {
         return new LookupException("Value not found for given key " + key);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    static <T> Converter<T, Object>[] toGeneric(final Converter... converters) {
-        return (Converter<T, Object>[]) converters;
-    }
-
     @SuppressWarnings("unchecked")
-    static <T> Lookup<Lookup<T>> toLookup2(final Lookup<?> create) {
-        return (Lookup<Lookup<T>>) create;
-    }
-
-    @SuppressWarnings("unchecked")
-    static <T> Class<T> getClass(T value) {
-        return (Class<T>) value.getClass();
+    static <T> T cast(Object o) {
+        return (T) o;
     }
 
     @SuppressWarnings("unchecked")
