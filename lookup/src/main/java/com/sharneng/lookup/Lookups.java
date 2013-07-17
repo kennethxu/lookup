@@ -30,12 +30,20 @@ import javax.annotation.CheckForNull;
  */
 public final class Lookups {
 
-    public static <T> Sourced<T, T> from(Collection<? extends T> source) {
-        checkValues(source);
-        return new LookupBuilder<T, T>(source);
+    private Lookups() {
     }
 
-    private Lookups() {
+    /**
+     * Specify the source data for the lookup to be built.
+     * 
+     * @param source
+     *            a collection of source data
+     * @param <T>
+     *            they type of the source data
+     * @return a fluent API interface to be continue building the lookup
+     */
+    public static <T> Sourced<T, T> from(@CheckForNull Collection<? extends T> source) {
+        return new LookupBuilder<T, T>(source);
     }
 
     /**
@@ -225,10 +233,5 @@ public final class Lookups {
     public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final String... properties) {
         return from(values).defaultTo(defaultValue).by(properties).index();
-    }
-
-    private static void checkValues(final Collection<?> values) {
-        if (values == null) throw new IllegalArgumentException(Utils.notNull("values"));
-        if (values.size() == 0) throw new IllegalArgumentException("Argument values collection must not be empty");
     }
 }

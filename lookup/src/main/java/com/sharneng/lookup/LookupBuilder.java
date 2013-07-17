@@ -21,6 +21,7 @@ import com.sharneng.lookup.fluent.Sourced;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,85 +34,130 @@ import javax.annotation.CheckForNull;
  * @author Kenneth Xu
  * 
  */
-final class LookupBuilder<E, T> implements Sourced<E, T>, Indexed<E, T> {
+final class LookupBuilder<E, T> implements Sourced<E, T> {
     private enum Duplication {
         FIRST,
         LAST,
         FAIL
     }
 
-    private Duplication duplication = Duplication.FAIL;
+    private class Indexer implements Indexed<E, Lookup<T>> {
 
+        @SuppressWarnings("unchecked")
+        @Override
+        public Lookup<T> index() {
+            return (Lookup<T>) build();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Indexed<E, Lookup<Lookup<T>>> by(String property) {
+            return (Indexed<E, Lookup<Lookup<T>>>) (Indexed<E, ?>) LookupBuilder.this.by(property);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Defined<Lookup<?>> by(String... properties) {
+            for (String s : properties)
+                LookupBuilder.this.by(s);
+            return (Defined<Lookup<?>>) (Defined<?>) this;
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Indexed<E, Lookup<Lookup<T>>> by(Converter<E, Object> converter) {
+            return (Indexed<E, Lookup<Lookup<T>>>) (Indexed<E, ?>) LookupBuilder.this.by(converter);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Defined<Lookup<?>> by(Converter<E, Object>... converters) {
+            for (Converter<E, Object> converter : converters)
+                LookupBuilder.this.by(converter);
+            return (Defined<Lookup<?>>) (Defined<?>) this;
+        }
+
+    }
+
+    private Duplication duplication = Duplication.FAIL;
     @CheckForNull
     private T defaultValue;
     private Lookup<?>[] chain;
     private Object[] keys;
-    private Collection<? extends E> source;
+    private final Collection<? extends E> source;
     @SuppressWarnings("unchecked")
     private Converter<E, T> selectConverter = (Converter<E, T>) Utils.toSelf();
     private int keyCount;
     private List<Converter<E, Object>> converters = new ArrayList<Converter<E, Object>>();
+    private Indexer indexer = new Indexer();
 
-    public LookupBuilder(final Collection<? extends E> source) {
-        this.source = source;
+    public LookupBuilder(@CheckForNull final Collection<? extends E> source) {
+        this.source = source == null ? Collections.<E> emptyList() : source;
     }
 
+    @Override
     public Sourced<E, T> defaultTo(@CheckForNull T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
 
+    @Override
     public <Q> Sourced<E, Q> select(Class<Q> clazz, String expression) {
         return select(new OgnlConverter<E, Q>(clazz, expression));
     }
 
     @Override
     public <Q> Sourced<E, Q> select(Converter<E, Q> converter) {
-        final LookupBuilder<E, Q> that = Utils.<LookupBuilder<E, Q>> cast(this);
+        @SuppressWarnings("unchecked")
+        final LookupBuilder<E, Q> that = (LookupBuilder<E, Q>) this;
         that.selectConverter = converter;
         return that;
     }
 
+    @Override
     public Indexed<E, Lookup<T>> by(Converter<E, Object> converter) {
         converters.add(converter);
-        return Utils.<Indexed<E, Lookup<T>>> cast(this);
+        return indexer;
     }
 
+    @Override
     public Indexed<E, Lookup<T>> by(String property) {
         return by(new OgnlConverter<E, Object>(Object.class, property));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Defined<Lookup<?>> by(String... properties) {
-        for (String s : properties)
-            by(s);
-        return (Defined<Lookup<?>>) this;
+        return indexer.by(properties);
     }
 
     @Override
     public Defined<Lookup<?>> by(Converter<E, Object>... converters) {
-        for (Converter<E, Object> converter : converters)
-            by(converter);
-        return (Defined<Lookup<?>>) this;
+        return indexer.by(converters);
     }
 
-    public Sourced<E, T> useFirstWhenDuplication() {
+    @Override
+    public Sourced<E, T> notEmpty() {
+        if (source.size() == 0) throw new LookupBuildException("source collection must not be empty");
+        return this;
+    }
+
+    @Override
+    public Sourced<E, T> useFirstOnDuplicate() {
         duplication = Duplication.FIRST;
         return this;
     }
 
-    public Sourced<E, T> useLastWhenDuplication() {
+    @Override
+    public Sourced<E, T> useLastOnDuplicate() {
         duplication = Duplication.LAST;
         return this;
     }
 
-    // public Lookup<?> index() {
-    public T index() {
+    private Lookup<?> build() {
         keyCount = converters.size();
         this.chain = buildChain();
         this.keys = new Object[keyCount];
-        return (T) (keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0)));
+        return (keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0)));
     }
 
     private Lookup<?>[] buildChain() {

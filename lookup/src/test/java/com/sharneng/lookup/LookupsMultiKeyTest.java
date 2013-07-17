@@ -1,11 +1,11 @@
 package com.sharneng.lookup;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 
 import com.sharneng.lookup.testdata.CountyCode;
 import com.sharneng.lookup.testdata.LookupMatcher;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.hamcrest.Matcher;
 import org.junit.Rule;
@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
+@SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
 public class LookupsMultiKeyTest {
     private static final Lookup<CountyCode> argumentDefault = new EmptyLookup<CountyCode>(CountyCode.DEFAULT);
     private static final CountyCode found = new CountyCode(1081, "Alabama", "Lee");
@@ -100,6 +100,7 @@ public class LookupsMultiKeyTest {
     }
 
     @Test
+    @SuppressFBWarnings("NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS")
     public void create_chokes_onNullConverters() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("converters");
@@ -109,11 +110,12 @@ public class LookupsMultiKeyTest {
 
     @Test
     public void create_chokes_onEmptyConverters() {
+        @SuppressWarnings("unchecked")
+        final Converter<CountyCode, Object>[] converters = (Converter<CountyCode, Object>[]) (new Converter<?, ?>[0]);
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("converter");
 
-        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT)
-                .by(Utils.<CountyCode> toGeneric(new Converter<?, ?>[0]));
+        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by(converters);
     }
 
     @Test

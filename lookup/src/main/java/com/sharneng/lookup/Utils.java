@@ -19,11 +19,6 @@ final class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    static <T> T cast(Object o) {
-        return (T) o;
-    }
-
-    @SuppressWarnings("unchecked")
     static <T> Converter<T, T> toSelf() {
         return (Converter<T, T>) TO_SELF;
     }

@@ -7,12 +7,9 @@ import com.sharneng.lookup.testdata.CountyCode;
 public class LookupBuilderSingleKeyTest {
     private static final CountyCode found = new CountyCode(1081, "Alabama", "Lee");
 
-    @SuppressWarnings("unchecked")
     private static Lookup<CountyCode> createLookup(CountyCode instanceDefault) {
         LookupBuilder<CountyCode, CountyCode> builder = new LookupBuilder<CountyCode, CountyCode>(CountyCode.codes);
-        builder.defaultTo(instanceDefault);
-        builder.by("code");
-        return (Lookup<CountyCode>) builder.index();
+        return builder.defaultTo(instanceDefault).by("code").index();
     }
 
     public static class WithDefaultFound extends LookupWithDefaultFoundTest<CountyCode> {

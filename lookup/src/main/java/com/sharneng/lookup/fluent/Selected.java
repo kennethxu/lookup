@@ -24,13 +24,41 @@ import javax.annotation.CheckForNull;
  * @author Kenneth Xu
  * 
  * @param <E>
+ *            type of the source data
  * @param <T>
+ *            the element type of the lookup being built
  */
 public interface Selected<E, T> extends Indexing<E, T> {
 
-    // Selected<T, P> of(Class<? extends T> clazz);
+    /**
+     * Ensure the source data collection is neither null nor empty.
+     * 
+     * @return this instance for continuous fluent API call
+     * @exception com.sharneng.lookup.LookupBuildException
+     *                if the source collection is null or empty
+     */
+    Selected<E, T> notEmpty();
 
-    Selected<E, T> useFirstWhenDuplication();
+    /**
+     * When same set of key resolve to two or more duplicated values, use first occurrence of the result.
+     * 
+     * @return this instance for continuous fluent API call
+     */
+    Selected<E, T> useFirstOnDuplicate();
 
+    /**
+     * When same set of key resolve to two or more duplicated values, use last occurrence of the result.
+     * 
+     * @return this instance for continuous fluent API call
+     */
+    Selected<E, T> useLastOnDuplicate();
+
+    /**
+     * Set the default value to be returned when the referenced value is not found in the built lookup.
+     * 
+     * @param defaultValue
+     *            the default value to be returned when the referenced value is not found in the built lookup
+     * @return this instance for continuous fluent API call
+     */
     Selected<E, T> defaultTo(@CheckForNull T defaultValue);
 }

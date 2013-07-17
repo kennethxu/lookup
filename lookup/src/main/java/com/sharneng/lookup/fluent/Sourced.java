@@ -24,15 +24,51 @@ import com.sharneng.lookup.Converter;
  * @author Kenneth Xu
  * 
  * @param <E>
+ *            type of the source data
  * @param <T>
+ *            the element type of the lookup being built
  */
 public interface Sourced<E, T> extends Selected<E, T> {
 
-    Sourced<E, T> useFirstWhenDuplication();
+    /**
+     * {@inheritDoc}
+     */
+    Sourced<E, T> notEmpty();
 
-    Sourced<E, T> useLastWhenDuplication();
+    /**
+     * {@inheritDoc}
+     */
+    Sourced<E, T> useFirstOnDuplicate();
 
-    <Q> Selected<E, Q> select(Class<Q> clazz, String property);
+    /**
+     * {@inheritDoc}
+     */
+    Sourced<E, T> useLastOnDuplicate();
 
-    <Q> Sourced<E, Q> select(Converter<E, Q> converter);
+    /**
+     * Specifies the expression to compute a value from the source data, the computed value will be those returned from
+     * the built lookup.
+     * 
+     * @param clazz
+     *            the class of the computed value of the expression
+     * @param expression
+     *            the expression to compute the value to be returned by the built lookup
+     * @param <Q>
+     *            the type of the computed value of the expression
+     * @return this instance to continue fluent API call
+     * 
+     */
+    <Q> Selected<E, Q> select(Class<Q> clazz, String expression);
+
+    /**
+     * Specifies the converter to compute a value from the source data, the computed value will be those returned from
+     * the built lookup.
+     * 
+     * @param converter
+     *            the converter to compute the value to be returned by the built lookup
+     * @param <Q>
+     *            the type of the computed value of the converter
+     * @return this instance to continue fluent API call
+     */
+    <Q> Selected<E, Q> select(Converter<E, Q> converter);
 }

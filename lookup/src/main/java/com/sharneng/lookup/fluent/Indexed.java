@@ -15,5 +15,18 @@
  */
 package com.sharneng.lookup.fluent;
 
-public interface Indexed<E, T> extends Defined<T>, Indexing<E, T> {
+import com.sharneng.lookup.Lookup;
+
+/**
+ * Represent a indexed stage of the fluent API that enough information is collected to create a new
+ * {@link com.sharneng.lookup.Lookup} instance, or further indexing can be added to it.
+ * 
+ * @author Kenneth Xu
+ * 
+ * @param <E>
+ *            The type of the source data to create the lookup
+ * @param <T>
+ *            The type of the lookup to be built
+ */
+public interface Indexed<E, T extends Lookup<?>> extends Defined<T>, Indexing<E, T> {
 }
