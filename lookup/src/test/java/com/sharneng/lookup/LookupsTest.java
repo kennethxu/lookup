@@ -45,9 +45,9 @@ public class LookupsTest {
         assertThat(p, nullValue());
     }
 
+    @Test
     public void syntax() {
-        Lookups.from(CountyCode.codes).of(CountyCode.class).select("code", Integer.class).defaultTo(100).by("state")
-                .by("county").index();
+        Lookups.from(CountyCode.codes).select("code", Integer.class).defaultTo(100).by("state").by("county").index();
         Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by("state", "county").index();
     }
 }

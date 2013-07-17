@@ -26,9 +26,9 @@ package com.sharneng.lookup.fluent;
  */
 public interface Sourced<T, P> extends Selected<T, P> {
 
-    Sourced<T, P> of(Class<? extends T> clazz);
+    Sourced<T, P> useFirstWhenDuplication();
 
-    Sourced<T, P> unqiue();
+    Sourced<T, P> useLastWhenDuplication();
 
     <Q> Selected<T, Q> select(String property, Class<Q> clazz);
 }

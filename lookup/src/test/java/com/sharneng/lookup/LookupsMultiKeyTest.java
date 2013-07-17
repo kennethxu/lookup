@@ -65,22 +65,6 @@ public class LookupsMultiKeyTest {
     }
 
     @Test
-    public void createWithClass_chokes_onNullProperty() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property2");
-
-        Lookups.create(CountyCode.codes, CountyCode.class, "state", (String) null);
-    }
-
-    @Test
-    public void createWithDefaultAndClass_chokes_onNullProperty() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property2");
-
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, CountyCode.class, "state", (String) null);
-    }
-
-    @Test
     public void create_chokes_onNullValues() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("values");
@@ -107,27 +91,12 @@ public class LookupsMultiKeyTest {
     }
 
     @Test
-    public void createWithClass_chokes_onNullClass() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("clazz");
-
-        Lookups.create(CountyCode.codes, (Class<CountyCode>) null, "state", "county");
-    }
-
-    @Test
-    public void createWithDefaultAndClass_chokes_onNullClass() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("clazz");
-
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, (Class<CountyCode>) null, "state", "county");
-    }
-
-    @Test
     public void create_chokes_onNullConverter() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("converter2");
 
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, toState, (Converter<CountyCode, Object>) null);
+        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by(toState)
+                .by((Converter<CountyCode, Object>) null);
     }
 
     @Test
@@ -135,7 +104,7 @@ public class LookupsMultiKeyTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("converters");
 
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, (Converter<CountyCode, Object>[]) null);
+        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by((Converter<CountyCode, Object>[]) null);
     }
 
     @Test
@@ -143,7 +112,8 @@ public class LookupsMultiKeyTest {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("converter");
 
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, Utils.toGeneric(new Converter<?, ?>[0]));
+        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT)
+                .by(Utils.<CountyCode> toGeneric(new Converter<?, ?>[0]));
     }
 
     @Test
@@ -163,7 +133,7 @@ public class LookupsMultiKeyTest {
 
         @Override
         protected Lookup<Lookup<CountyCode>> newLookup() {
-            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, CountyCode.class, "state", "county");
+            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, "state", "county");
         }
     }
 
@@ -174,7 +144,7 @@ public class LookupsMultiKeyTest {
 
         @Override
         protected Lookup<Lookup<CountyCode>> newLookup() {
-            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, CountyCode.class, "state", "county");
+            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, "state", "county");
         }
     }
 
@@ -185,7 +155,8 @@ public class LookupsMultiKeyTest {
 
         @Override
         protected Lookup<CountyCode> newLookup() {
-            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, toState, toCounty).get(found.getState());
+            return Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by(toState).by(toCounty).index()
+                    .get(found.getState());
         }
     }
 

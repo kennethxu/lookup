@@ -15,6 +15,7 @@
  */
 package com.sharneng.lookup.fluent;
 
+import com.sharneng.lookup.Converter;
 import com.sharneng.lookup.Lookup;
 
 /**
@@ -22,10 +23,14 @@ import com.sharneng.lookup.Lookup;
  * 
  * @author Kenneth Xu
  * 
- * @param <T>
+ * @param <E>
  */
-public interface Indexing<T> {
-    Indexed<Lookup<T>> by(String property);
+public interface Indexing<E, T> {
+    Indexed<E, Lookup<T>> by(String property);
 
     Defined<Lookup<?>> by(String... properties);
+
+    Indexed<E, Lookup<T>> by(Converter<E, Object> converter);
+
+    Defined<Lookup<?>> by(Converter<E, Object>... converters);
 }

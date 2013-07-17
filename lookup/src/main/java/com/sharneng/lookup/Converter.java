@@ -27,7 +27,7 @@ import javax.annotation.CheckForNull;
  * @param <TTo>
  *            type of the object to convert to
  */
-interface Converter<TFrom, TTo> {
+public interface Converter<TFrom, TTo> {
 
     /**
      * Convert from one object to another.

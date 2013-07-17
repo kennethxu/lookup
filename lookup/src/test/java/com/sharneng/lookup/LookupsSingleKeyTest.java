@@ -60,22 +60,6 @@ public class LookupsSingleKeyTest {
     }
 
     @Test
-    public void createWithClass_chokes_onNullProperty() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property");
-
-        Lookups.create(CountyCode.codes, CountyCode.class, (String) null);
-    }
-
-    @Test
-    public void createWithDefaultAndClass_chokes_onNullProperty() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property");
-
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, CountyCode.class, (String) null);
-    }
-
-    @Test
     public void create_chokes_onNullValues() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("values");
@@ -102,27 +86,11 @@ public class LookupsSingleKeyTest {
     }
 
     @Test
-    public void createWithClass_chokes_onNullClass() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("clazz");
-
-        Lookups.create(CountyCode.codes, (Class<CountyCode>) null, "code");
-    }
-
-    @Test
-    public void createWithDefaultAndClass_chokes_onNullClass() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("clazz");
-
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, (Class<CountyCode>) null, "code");
-    }
-
-    @Test
     public void create_chokes_onNullConverter() {
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("converter");
 
-        Lookups.create(CountyCode.DEFAULT, CountyCode.codes, (Converter<CountyCode, Object>) null);
+        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by((Converter<CountyCode, Object>) null);
     }
 
     @Test
@@ -197,7 +165,7 @@ public class LookupsSingleKeyTest {
 
         @Override
         protected Lookup<CountyCode> newLookup() {
-            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, CountyCode.class, "code");
+            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, "code");
         }
     }
 
@@ -219,7 +187,7 @@ public class LookupsSingleKeyTest {
 
         @Override
         protected Lookup<CountyCode> newLookup() {
-            return Lookups.create(CountyCode.codes, CountyCode.class, "code");
+            return Lookups.create(CountyCode.codes, "code");
         }
     }
 
@@ -230,7 +198,7 @@ public class LookupsSingleKeyTest {
 
         @Override
         protected Lookup<CountyCode> newLookup() {
-            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, toCode);
+            return Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by(toCode).index();
         }
     }
 

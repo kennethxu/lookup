@@ -1,8 +1,12 @@
 package com.sharneng.lookup;
 
-import java.lang.reflect.Method;
-
 final class Utils {
+    private static final Converter<?, ?> TO_SELF = new Converter<Object, Object>() {
+        public Object convert(Object source) {
+            return source;
+        }
+    };
+
     private Utils() {
     }
 
@@ -29,20 +33,9 @@ final class Utils {
         return (Class<T>) value.getClass();
     }
 
-    static <T> Converter<T, Object>[] toConverters(final Class<? extends T> clazz, final String... properties) {
-        if (clazz == null) throw new IllegalArgumentException(notNull("clazz"));
-        if (properties == null) throw new IllegalArgumentException(notNull("properties"));
-        if (properties.length == 0) throw new IllegalArgumentException("At least one property must be supplied");
-        final Converter<T, Object>[] converters = toGeneric(new Converter[properties.length]);
-        for (int i = 0; i < properties.length; i++) {
-            if (properties[i] == null) throw new IllegalArgumentException(notNull("property" + (i + 1)));
-        }
-        Method[] getters = new PropertyGetterFinder().findGetters(clazz, properties);
-        for (int i = 0; i < getters.length; i++) {
-            if (getters[i] == null) throw new LookupBuildException("Unable to find getter for property "
-                    + properties[i] + " on class " + clazz);
-            converters[i] = new PropertyConverter<T>(getters[i]);
-        }
-        return converters;
+    @SuppressWarnings("unchecked")
+    static <T> Converter<T, T> toSelf() {
+        return (Converter<T, T>) TO_SELF;
     }
+
 }

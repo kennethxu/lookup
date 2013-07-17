@@ -9,8 +9,10 @@ public class LookupBuilderSingleKeyTest {
 
     @SuppressWarnings("unchecked")
     private static Lookup<CountyCode> createLookup(CountyCode instanceDefault) {
-        return (Lookup<CountyCode>) new LookupBuilder<CountyCode>(instanceDefault, CountyCode.class, "code")
-                .build(CountyCode.codes);
+        LookupBuilder<CountyCode, CountyCode> builder = new LookupBuilder<CountyCode, CountyCode>(CountyCode.codes);
+        builder.setDefaultValue(instanceDefault);
+        builder.addIndex("code");
+        return (Lookup<CountyCode>) builder.build();
     }
 
     public static class WithDefaultFound extends LookupWithDefaultFoundTest<CountyCode> {

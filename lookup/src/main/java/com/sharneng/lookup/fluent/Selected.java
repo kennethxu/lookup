@@ -15,20 +15,22 @@
  */
 package com.sharneng.lookup.fluent;
 
+import javax.annotation.CheckForNull;
+
 /**
  * Represent a stage of the fluent API that the resulting member is selected for building a
  * {@link com.sharneng.lookup.Lookup} instance.
  * 
  * @author Kenneth Xu
  * 
+ * @param <E>
  * @param <T>
- * @param <P>
  */
-public interface Selected<T, P> extends Indexing<P> {
+public interface Selected<E, T> extends Indexing<E, T> {
 
     // Selected<T, P> of(Class<? extends T> clazz);
 
-    Selected<T, P> unqiue();
+    Selected<E, T> useFirstWhenDuplication();
 
-    Selected<T, P> defaultTo(P defaultValue);
+    Selected<E, T> defaultTo(@CheckForNull T defaultValue);
 }

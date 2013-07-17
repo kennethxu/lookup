@@ -18,6 +18,7 @@ package com.sharneng.lookup;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.CheckForNull;
@@ -28,68 +29,114 @@ import javax.annotation.CheckForNull;
  * @author Kenneth Xu
  * 
  */
-final class LookupBuilder<T> {
+final class LookupBuilder<E, T> {
+    private enum Duplication {
+        FIRST,
+        LAST,
+        FAIL
+    }
 
-    private final T defaultValue;
-    private final Converter<T, Object>[] converters;
-    private final Lookup<?>[] chain;
-    private final Object[] keys;
+    private Duplication duplication = Duplication.FAIL;
 
-    public LookupBuilder(@CheckForNull T defaultValue, final Converter<T, Object>[] converters) {
+    @CheckForNull
+    private T defaultValue;
+    private Lookup<?>[] chain;
+    private Object[] keys;
+    private Collection<? extends E> source;
+    @SuppressWarnings("unchecked")
+    private Converter<E, T> selectConverter = (Converter<E, T>) Utils.toSelf();
+    private int keyCount;
+    private List<Converter<E, Object>> converters = new ArrayList<Converter<E, Object>>();
+
+    public LookupBuilder(final Collection<? extends E> source) {
+        this.source = source;
+    }
+
+    public void setDefaultValue(@CheckForNull T defaultValue) {
         this.defaultValue = defaultValue;
-        this.converters = converters;
+    }
+
+    public void select(Class<T> clazz, String expression) {
+        select(new OgnlConverter<E, T>(clazz, expression));
+    }
+
+    public void select(Converter<E, T> converter) {
+        selectConverter = converter;
+    }
+
+    public void addIndex(Converter<E, Object> converter) {
+        converters.add(converter);
+    }
+
+    public void addIndex(String property) {
+        addIndex(new OgnlConverter<E, Object>(Object.class, property));
+    }
+
+    public void useFirstWhenDuplication() {
+        duplication = Duplication.FIRST;
+    }
+
+    public void useLastWhenDuplication() {
+        duplication = Duplication.LAST;
+    }
+
+    public Lookup<?> build() {
+        keyCount = converters.size();
         this.chain = buildChain();
-        this.keys = new Object[converters.length];
-    }
-
-    public LookupBuilder(@CheckForNull T defaultValue, final Class<? extends T> clazz, final String... properties) {
-        this(defaultValue, Utils.toConverters(clazz, properties));
-    }
-
-    public Lookup<?> build(final Collection<? extends T> values) {
-        return build(values, 0);
+        this.keys = new Object[keyCount];
+        return keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0));
     }
 
     private Lookup<?>[] buildChain() {
-        Lookup<?>[] chain = new Lookup<?>[converters.length];
+        Lookup<?>[] chain = new Lookup<?>[keyCount];
         Lookup<?> lookup = new EmptyLookup<T>(defaultValue);
         chain[0] = lookup;
-        for (int i = 1; i < converters.length; i++) {
+        for (int i = 1; i < keyCount; i++) {
             lookup = new EmptyLookup<Object>(lookup);
             chain[i] = lookup;
         }
         return chain;
     }
 
-    private Lookup<?> build(final Collection<? extends T> values, int index) {
+    private Lookup<?> multiLevel(final Collection<? extends E> values, int index) {
 
-        Converter<T, Object> converter = converters[index];
-        if (++index == converters.length) return new MapBasedLookup<T, T>(defaultValue, values, converter) {
-            protected void handleDuplicate(T oldValue, T newValue, Object key) {
-                keys[keys.length - 1] = key;
-                throw new DuplicateKeyException(newValue, oldValue, keys);
-            }
-        }; // last one
+        Converter<E, Object> converter = converters.get(index);
+        if (++index == keyCount) return lastLevel(values, converter); // last one
 
-        Map<Object, Collection<T>> map = new HashMap<Object, Collection<T>>();
-        for (T value : values) {
+        Map<Object, Collection<E>> map = new HashMap<Object, Collection<E>>();
+        for (E value : values) {
             Object key = converter.convert(value);
-            Collection<T> c = map.get(key);
+            Collection<E> c = map.get(key);
             if (c == null) {
-                c = new ArrayList<T>();
+                c = new ArrayList<E>();
                 map.put(key, c);
             }
             c.add(value);
         }
 
         Map<Object, Lookup<?>> lookupMap = new HashMap<Object, Lookup<?>>();
-        for (Map.Entry<Object, Collection<T>> entry : map.entrySet()) {
+        for (Map.Entry<Object, Collection<E>> entry : map.entrySet()) {
             final Object key = entry.getKey();
             keys[index - 1] = key;
-            lookupMap.put(key, build(entry.getValue(), index));
+            lookupMap.put(key, multiLevel(entry.getValue(), index));
         }
 
-        return new MapBasedLookup<Lookup<?>, Lookup<?>>(lookupMap, chain[converters.length - index - 1]);
+        return new MapBasedLookup<Lookup<?>>(lookupMap, chain[keyCount - index - 1]);
+    }
+
+    private Lookup<T> lastLevel(final Collection<? extends E> values, Converter<E, Object> converter) {
+        final Map<Object, T> map = new HashMap<Object, T>();
+        for (E e : values) {
+            T value = selectConverter.convert(e);
+            final Object key = converter.convert(e);
+            if (duplication == Duplication.LAST || !map.containsKey(key)) {
+                map.put(key, value);
+            } else if (duplication == Duplication.FAIL) {
+                keys[keys.length - 1] = key;
+                throw new DuplicateKeyException(value, map.get(key), keys);
+            }
+        }
+        return new MapBasedLookup<T>(map, defaultValue);
     }
 
 }

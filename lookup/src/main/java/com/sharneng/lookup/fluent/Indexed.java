@@ -15,5 +15,5 @@
  */
 package com.sharneng.lookup.fluent;
 
-public interface Indexed<T> extends Defined<T>, Indexing<T> {
+public interface Indexed<E, T> extends Defined<T>, Indexing<E, T> {
 }

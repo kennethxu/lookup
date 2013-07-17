@@ -34,55 +34,74 @@ import javax.annotation.CheckForNull;
  */
 public final class Lookups {
 
-    public static <T> Sourced<T, T> from(Collection<? extends T> values) {
-        return new PrivateBuilder<T, T>(values);
+    public static <T> Sourced<T, T> from(Collection<? extends T> source) {
+        checkValues(source);
+        LookupBuilder<T, T> builder = new LookupBuilder<T, T>(source);
+        return new PrivateBuilder<T, T>(builder);
     }
 
-    private static class PrivateBuilder<E, T> implements Sourced<E, T>, Indexed<T> {
-        private final FluentBuilder<E, T> fb;
+    private static class PrivateBuilder<E, T> implements Sourced<E, T>, Indexed<E, T> {
+        private final LookupBuilder<E, T> builder;
 
-        public PrivateBuilder(Collection<? extends E> source) {
-            fb = new FluentBuilder<E, T>(source);
+        public PrivateBuilder(LookupBuilder<E, T> builder) {
+            this.builder = builder;
         }
 
-        public Sourced<E, T> defaultTo(T defaultValue) {
-            fb.setDefaultValue(defaultValue);
-            return this;
-        }
-
-        public Sourced<E, T> of(Class<? extends E> clazz) {
-            fb.setSourceClass(clazz);
+        public Sourced<E, T> defaultTo(@CheckForNull T defaultValue) {
+            builder.setDefaultValue(defaultValue);
             return this;
         }
 
         @SuppressWarnings("unchecked")
-        public <Q> Sourced<E, Q> select(String property, Class<Q> clazz) {
-            fb.addSelect(property, (Class<T>) clazz);
+        public <Q> Sourced<E, Q> select(String expression, Class<Q> clazz) {
+            builder.select((Class<T>) clazz, expression);
             return (Sourced<E, Q>) this;
         }
 
         @SuppressWarnings("unchecked")
-        public Indexed<Lookup<T>> by(String property) {
-            fb.addIndex(property);
-            return (Indexed<Lookup<T>>) this;
+        public Indexed<E, Lookup<T>> by(String expression) {
+            builder.addIndex(expression);
+            return (Indexed<E, Lookup<T>>) this;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Indexed<E, Lookup<T>> by(Converter<E, Object> converter) {
+            builder.addIndex(converter);
+            return (Indexed<E, Lookup<T>>) this;
         }
 
         public T index() {
-            return (T) fb.build();
+            return (T) builder.build();
         }
 
         @SuppressWarnings("unchecked")
         @Override
         public Defined<Lookup<?>> by(String... properties) {
             for (String s : properties)
-                fb.addIndex(s);
+                builder.addIndex(s);
             return (Defined<Lookup<?>>) this;
         }
 
         @Override
-        public Sourced<E, T> unqiue() {
+        public Defined<Lookup<?>> by(Converter<E, Object>... converters) {
+            for (Converter<E, Object> converter : converters)
+                builder.addIndex(converter);
+            return (Defined<Lookup<?>>) this;
+        }
+
+        @Override
+        public Sourced<E, T> useFirstWhenDuplication() {
+            builder.useFirstWhenDuplication();
             return this;
         }
+
+        @Override
+        public Sourced<E, T> useLastWhenDuplication() {
+            builder.useLastWhenDuplication();
+            return this;
+        }
+
     }
 
     private Lookups() {
@@ -124,7 +143,7 @@ public final class Lookups {
      */
     public static <T> Lookup<T> create(final Map<? extends Object, ? extends T> map, @CheckForNull T defaultValue) {
         if (map == null) throw new IllegalArgumentException(Utils.notNull("map"));
-        return new MapBasedLookup<T, T>(map, defaultValue);
+        return new MapBasedLookup<T>(map, defaultValue);
     }
 
     /* values, string */
@@ -144,9 +163,7 @@ public final class Lookups {
      * @return an implementation of {@link Lookup} indexed by the specified property
      */
     public static <T> Lookup<T> create(final Collection<? extends T> values, final String property) {
-        checkValues(values);
-        if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
-        return new MapBasedLookup<T, T>(null, values, new PropertyConverter<T>(getElementClass(values), property));
+        return create(null, values, property);
     }
 
     /**
@@ -167,7 +184,8 @@ public final class Lookups {
      */
     public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final String property1,
             final String property2) {
-        return Utils.toLookup2(create(values, new String[] { property1, property2 }));
+        return create(null, values, property1, property2);
+        // return Utils.toLookup2(create(values, new String[] { property1, property2 }));
     }
 
     /**
@@ -185,8 +203,9 @@ public final class Lookups {
      * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
      */
     public static <T> Lookup<?> create(final Collection<? extends T> values, final String... properties) {
-        checkValues(values);
-        return new LookupBuilder<T>(null, getElementClass(values), properties).build(values);
+        return create(null, values, properties);
+        // checkValues(values);
+        // return new LookupBuilder<T>(null, getElementClass(values), properties).build(values);
     }
 
     /* default, values, string */
@@ -214,8 +233,10 @@ public final class Lookups {
      */
     public static <T> Lookup<T> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final String property) {
-        return defaultValue != null ? create(defaultValue, values, Utils.getClass(defaultValue), property) : create(
-                values, property);
+        return from(values).defaultTo(defaultValue).by(property).index();
+        // checkValues(values);
+        // if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
+        // return new MapBasedLookup<T>(defaultValue, values, new OgnlConverter<T, Object>(Object.class, property));
     }
 
     /**
@@ -244,7 +265,8 @@ public final class Lookups {
      */
     public static <T> Lookup<Lookup<T>> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final String property1, final String property2) {
-        return Utils.toLookup2(create(defaultValue, values, new String[] { property1, property2 }));
+        return from(values).defaultTo(defaultValue).by(property1).by(property2).index();
+        // return Utils.toLookup2(create(defaultValue, values, new String[] { property1, property2 }));
     }
 
     /**
@@ -271,191 +293,11 @@ public final class Lookups {
      */
     public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
             final String... properties) {
-        return defaultValue != null ? create(defaultValue, values, Utils.getClass(defaultValue), properties) : create(
-                values, properties);
-    }
-
-    /* class, values, string */
-
-    /**
-     * Create a {@link Lookup} for objects in the given collection indexed by given property defined on given class.
-     * This is equivalent to {@link #create(Object, Collection, Class, String) create(null, values, clazz, property)}
-     * 
-     * @param values
-     *            a collection of objects that can be looked up
-     * @param clazz
-     *            the class where the index property is searched for
-     * @param property
-     *            the index property
-     * 
-     * @param <T>
-     *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} indexed by the specified property
-     */
-    public static <T> Lookup<T> create(final Collection<? extends T> values, final Class<? extends T> clazz,
-            final String property) {
-        return create(null, values, clazz, property);
-    }
-
-    /**
-     * Create a two level lookup for objects in the given collection indexed by given properties defined on given class.
-     * This is equivalent to {@link #create(Object, Collection, Class, String, String) create(null, values, clazz,
-     * property1, property2)}
-     * 
-     * @param values
-     *            a collection of objects that can be looked up.
-     * @param clazz
-     *            the class where the index property is searched for
-     * @param property1
-     *            the first index property
-     * @param property2
-     *            the second index property
-     * 
-     * @param <T>
-     *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
-     */
-    public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final Class<? extends T> clazz,
-            final String property1, final String property2) {
-        return create(null, values, clazz, property1, property2);
-    }
-
-    /**
-     * Create multilevel lookup for objects in the given collection indexed by the properties defined on given class.
-     * This is equivalent to {@link #create(Object, Collection, Class, String...) create(null, values, clazz,
-     * properties)}.
-     * 
-     * @param values
-     *            a collection of objects that can be looked up.
-     * @param clazz
-     *            the class where the index property is searched for
-     * @param properties
-     *            the index properties
-     * 
-     * @param <T>
-     *            type of the reference object to be looked up
-     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
-     */
-    public static <T> Lookup<?> create(final Collection<? extends T> values, final Class<? extends T> clazz,
-            final String... properties) {
-        return create(null, values, clazz, properties);
-    }
-
-    /* class, default, values, string */
-
-    /**
-     * Create a lookup for objects in the given collection indexed by the property defined on given class. The created
-     * lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference object.
-     * 
-     * @param defaultValue
-     *            the default value to be used if the lookup object is not found
-     * @param values
-     *            a collection of objects that can be looked up.
-     * @param clazz
-     *            the class where the index property is searched for
-     * @param property
-     *            the index property
-     * 
-     * @param <T>
-     *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} indexed by the specified property
-     */
-    public static <T> Lookup<T> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final Class<? extends T> clazz, final String property) {
-        checkValues(values);
-        if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
-        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
-        return new MapBasedLookup<T, T>(defaultValue, values, new PropertyConverter<T>(clazz, property));
-    }
-
-    /**
-     * Create a two level lookup for objects in the given collection indexed by the properties defined on given
-     * class.The created lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference
-     * object.
-     * <p>
-     * This is equivalent to {@link #create(Object, Collection, Class, String...) (Lookup&lt;Lookup&lt;T>>)
-     * create(defaultValue, values, clazz, new String[] &#123; property1, property2 &#125;)}.
-     * 
-     * @param defaultValue
-     *            the default value to be used if the lookup object is not found
-     * @param values
-     *            a collection of objects that can be looked up.
-     * @param clazz
-     *            the class where the index property is searched for
-     * @param property1
-     *            the first index property
-     * @param property2
-     *            the second index property
-     * 
-     * @param <T>
-     *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
-     */
-    public static <T> Lookup<Lookup<T>> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final Class<? extends T> clazz, final String property1, final String property2) {
-        return Utils.toLookup2(create(defaultValue, values, clazz, new String[] { property1, property2 }));
-    }
-
-    /**
-     * Create multilevel lookup for objects in the given collection indexed by the properties defined on given class.The
-     * created lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference object.
-     * 
-     * @param defaultValue
-     *            the default value to be used if the lookup object is not found
-     * @param values
-     *            a collection of objects that can be looked up
-     * @param clazz
-     *            the class where the index property is searched for
-     * @param properties
-     *            the index properties
-     * 
-     * @param <T>
-     *            type of the reference object to be looked up
-     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties in order
-     */
-    public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final Class<? extends T> clazz, final String... properties) {
-        checkValues(values);
-        return new LookupBuilder<T>(defaultValue, clazz, properties).build(values);
-    }
-
-    /* default, values, converter */
-
-    static <T> Lookup<T> create(T defaultValue, final Collection<? extends T> values,
-            final Converter<T, Object> converter) {
-        checkValues(values);
-        if (converter == null) throw new IllegalArgumentException(Utils.notNull("converter"));
-        return new MapBasedLookup<T, T>(defaultValue, values, converter);
-    }
-
-    static <T> Lookup<Lookup<T>> create(T defaultValue, final Collection<? extends T> values,
-            final Converter<T, Object> converter1, final Converter<T, Object> converter2) {
-        return Utils.toLookup2(create(defaultValue, values, Utils.toGeneric(converter1, converter2)));
-    }
-
-    static <T> Lookup<?> create(T defaultValue, final Collection<? extends T> values,
-            final Converter<T, Object>... converters) {
-        checkValues(values);
-        checkConverters(converters);
-        return new LookupBuilder<T>(defaultValue, converters).build(values);
-    }
-
-    private static <T> Class<T> getElementClass(final Collection<? extends T> values) {
-        for (T value : values)
-            if (value != null) return Utils.getClass(value);
-        throw new IllegalArgumentException("Argument values collection must contain non-null element");
+        return from(values).defaultTo(defaultValue).by(properties).index();
     }
 
     private static void checkValues(final Collection<?> values) {
         if (values == null) throw new IllegalArgumentException(Utils.notNull("values"));
         if (values.size() == 0) throw new IllegalArgumentException("Argument values collection must not be empty");
-    }
-
-    private static void checkConverters(final Converter<?, Object>[] converters) {
-        if (converters == null) throw new IllegalArgumentException(Utils.notNull("converters"));
-        if (converters.length == 0) throw new IllegalArgumentException("At least one converter must be supplied");
-        for (int i = 0; i < converters.length; i++) {
-            if (converters[i] == null) throw new IllegalArgumentException(Utils.notNull("converter" + (i + 1)));
-        }
     }
 }
