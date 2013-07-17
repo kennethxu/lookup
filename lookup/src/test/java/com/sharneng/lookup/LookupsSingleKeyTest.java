@@ -44,45 +44,37 @@ public class LookupsSingleKeyTest {
     }
 
     @Test
-    public void create_chokes_onNullProperty() {
+    public void create_chokes_onNullExpression() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property");
+        exception.expectMessage("expression");
+        exception.expectMessage("1st");
 
         Lookups.create(CountyCode.codes, (String) null);
     }
 
     @Test
-    public void createWithDefault_chokes_onNullProperty() {
+    public void createWithDefault_chokes_onNullExpression() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property");
+        exception.expectMessage("expression");
+        exception.expectMessage("1st");
 
         Lookups.create(CountyCode.DEFAULT, CountyCode.codes, (String) null);
     }
 
     @Test
-    public void create_chokes_onNullValues() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("values");
+    public void create_chokes_onNullSource() {
+        exception.expect(LookupBuildException.class);
+        exception.expectMessage("source");
 
         Lookups.create((Collection<CountyCode>) null, "code");
     }
 
     @Test
-    public void create_chokes_onEmptyValues() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("values");
+    public void create_chokes_onEmptySource() {
+        exception.expect(LookupBuildException.class);
+        exception.expectMessage("source");
 
         Lookups.create(new ArrayList<CountyCode>(), "code");
-    }
-
-    @Test
-    public void create_chokes_onNullFilledValues() {
-        final ArrayList<CountyCode> values = new ArrayList<CountyCode>();
-        values.add(null);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("values");
-
-        Lookups.create(values, "code");
     }
 
     @Test

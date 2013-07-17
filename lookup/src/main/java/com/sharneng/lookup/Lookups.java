@@ -85,153 +85,132 @@ public final class Lookups {
         return new MapBasedLookup<T>(map, defaultValue);
     }
 
-    /* values, string */
+    /* source, string */
 
     /**
-     * Create a lookup for objects in the given collection indexed by given property.
+     * Create a lookup for objects in the given collection indexed by the value computed from given expression.
      * <p>
-     * The class where the index property is searched for is determined by the first non-null element in the collection.
-     * Other than that, this is equivalent to {@link #create(Collection, Class, String)}.
+     * This is equivalent to {@code from(source).notEmpty().by(expression).index()}.
      * 
-     * @param values
-     *            a collection of objects that can be looked up.
-     * @param property
-     *            the index property
+     * @param source
+     *            a collection of source data that can be looked up.
+     * @param expression
+     *            the index expression that can compute the index value from the source data
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} indexed by the specified property
+     * @return an implementation of {@link Lookup} indexed by the specified expression
      */
-    public static <T> Lookup<T> create(final Collection<? extends T> values, final String property) {
-        return create(null, values, property);
+    public static <T> Lookup<T> create(final Collection<? extends T> source, final String expression) {
+        return create(null, source, expression);
     }
 
     /**
-     * Create a two level lookup for objects in the given collection indexed by given properties.
+     * Create a two level lookup for objects in the given collection indexed by the values computed from the given
+     * expressions.
      * <p>
-     * The class where the index properties are searched for is determined by the first non-null element in the
-     * collection. Other than that, this is equivalent to {@link #create(Collection, Class, String, String)}.
+     * This is equivalent to {@code from(source).notEmpty().by(expression1).by(expression2).index()}.
      * 
-     * @param values
+     * @param source
      *            a collection of objects that can be looked up.
-     * @param property1
-     *            the first index property
-     * @param property2
-     *            the second index property
+     * @param expression1
+     *            the first index expression
+     * @param expression2
+     *            the second index expression
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
+     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified expressions in order
      */
-    public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> values, final String property1,
-            final String property2) {
-        return create(null, values, property1, property2);
-        // return Utils.toLookup2(create(values, new String[] { property1, property2 }));
+    public static <T> Lookup<Lookup<T>> create(final Collection<? extends T> source, final String expression1,
+            final String expression2) {
+        return create(null, source, expression1, expression2);
     }
 
     /**
-     * Create multilevel lookup for objects in the given collection indexed by given properties.
+     * Create multilevel lookup for objects in the given collection indexed by the values computed from the given
+     * expressions.
      * <p>
-     * The class where the index properties are searched for is determined by the first non-null element in the
-     * collection. Other than that, it is equivalent to {@link #create(Collection, Class, String...)}.
+     * This is equivalent to {@code from(source).notEmpty().by(expressions).index()}.
      * 
-     * @param values
+     * @param source
      *            a collection of objects that can be looked up.
-     * @param properties
-     *            the index properties
+     * @param expressions
+     *            the index expressions
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified expressions
      */
-    public static <T> Lookup<?> create(final Collection<? extends T> values, final String... properties) {
-        return create(null, values, properties);
-        // checkValues(values);
-        // return new LookupBuilder<T>(null, getElementClass(values), properties).build(values);
+    public static <T> Lookup<?> create(final Collection<? extends T> source, final String... expressions) {
+        return create(null, source, expressions);
     }
 
-    /* default, values, string */
+    /* default, source, string */
 
     /**
-     * Create a lookup for objects in the given collection indexed by given property. The created lookup has default
-     * value returned when {@link Lookup#get(Object)} cannot find a reference object.
+     * Create a lookup for objects in the given collection indexed by the value computed from given expression. The
+     * created lookup has default value returned when {@link Lookup#get(Object)} cannot find a reference object.
      * <p>
-     * The class where index properties are searched for is determined by the actual type of {@code defaultValue} if it
-     * is not null. Otherwise, the actual type of first non {@code null} element in values collection is used.
-     * <p>
-     * When {@code defaultValue} is not null, this is equivalent to {@link #create(Object, Collection, Class, String)
-     * create(defaultValue, values, defaultValue.getClass(), property)}. Otherwise this is equivalent to
-     * {@link #create(Collection, String) create(values, property)}.
+     * This is equivalent to {@code from(source).notEmpty().defaultTo(defaultValue).by(expression).index()}.
      * 
      * @param defaultValue
      *            the default value to be used if the lookup object is not found
-     * @param values
+     * @param source
      *            a collection of objects that can be looked up.
-     * @param property
-     *            the index property
+     * @param expression
+     *            the index expression
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} indexed by the specified property
+     * @return an implementation of {@link Lookup} indexed by the specified expression
      */
-    public static <T> Lookup<T> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final String property) {
-        return from(values).defaultTo(defaultValue).by(property).index();
-        // checkValues(values);
-        // if (property == null) throw new IllegalArgumentException(Utils.notNull("property"));
-        // return new MapBasedLookup<T>(defaultValue, values, new OgnlConverter<T, Object>(Object.class, property));
+    public static <T> Lookup<T> create(@CheckForNull T defaultValue, final Collection<? extends T> source,
+            final String expression) {
+        return from(source).notEmpty().defaultTo(defaultValue).by(expression).index();
     }
 
     /**
-     * Create a two level lookup for objects in the given collection indexed by given properties.The created lookup has
-     * default value returned when {@link Lookup#get(Object)} cannot find a reference object.
+     * Create a two level lookup for objects in the given collection indexed by the values computed from the given
+     * expressions. The created lookup has default value returned when {@link Lookup#get(Object)} cannot find a
+     * reference object.
      * <p>
-     * The class where index properties are searched for is determined by the actual type of {@code defaultValue} if it
-     * is not null. Otherwise, the actual type of first non {@code null} element in values collection is used.
-     * <p>
-     * When {@code defaultValue} is not null, this is equivalent to
-     * {@link #create(Object, Collection, Class, String, String) create(defaultValue, values, defaultValue.getClass(),
-     * property1, property2)}. Otherwise this is equivalent to {@link #create(Collection, String, String) create(values,
-     * property1, property2)}.
+     * This is equivalent to
+     * {@code from(source).notEmpty().defaultTo(defaultValue).by(expression1).by(expression2).index()}.
      * 
      * @param defaultValue
      *            the default value to be used if the lookup object is not found
-     * @param values
+     * @param source
      *            a collection of objects that can be looked up.
-     * @param property1
-     *            the first index property
-     * @param property2
-     *            the second index property
+     * @param expression1
+     *            the first index expression
+     * @param expression2
+     *            the second index expression
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified properties in order
+     * @return an implementation of {@link Lookup} of {@code Lookup} indexed by the specified expressions in order
      */
-    public static <T> Lookup<Lookup<T>> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final String property1, final String property2) {
-        return from(values).defaultTo(defaultValue).by(property1).by(property2).index();
-        // return Utils.toLookup2(create(defaultValue, values, new String[] { property1, property2 }));
+    public static <T> Lookup<Lookup<T>> create(@CheckForNull T defaultValue, final Collection<? extends T> source,
+            final String expression1, final String expression2) {
+        return from(source).notEmpty().defaultTo(defaultValue).by(expression1).by(expression2).index();
     }
 
     /**
-     * Create multilevel lookup for objects in the given collection indexed by given properties. The created lookup has
-     * default value returned when {@link Lookup#get(Object)} cannot find a reference object.
+     * Create multilevel lookup for objects in the given collection indexed by the values computed from the given
+     * expressions. The created lookup has default value returned when {@link Lookup#get(Object)} cannot find a
+     * reference object.
      * <p>
-     * The class where index properties are searched for is determined by the actual type of {@code defaultValue} if it
-     * is not null. Otherwise, the actual type of first non {@code null} element in values collection is used.
-     * <p>
-     * When {@code defaultValue} is not null, this is equivalent to
-     * {@link #create(Object, Collection, Class, String...) create(defaultValue, values, defaultValue.getClass(),
-     * properties)}. Otherwise this is equivalent to {@link #create(Collection, String...) create(values, properties)}.
+     * This is equivalent to {@code from(source).notEmpty().defaultTo(defaultValue).by(expressions).index()}.
      * 
      * @param defaultValue
      *            the default value to be used if the lookup object is not found
-     * @param values
+     * @param source
      *            a collection of objects that can be looked up.
-     * @param properties
-     *            the index properties
+     * @param expressions
+     *            the index expressions
      * 
      * @param <T>
      *            type of the reference object to be looked up
-     * @return an implementation of multilevel {@link Lookup} indexed by the specified properties
+     * @return an implementation of multilevel {@link Lookup} indexed by the specified expressions
      */
-    public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> values,
-            final String... properties) {
-        return from(values).defaultTo(defaultValue).by(properties).index();
+    public static <T> Lookup<?> create(@CheckForNull T defaultValue, final Collection<? extends T> source,
+            final String... expressions) {
+        return from(source).notEmpty().defaultTo(defaultValue).by(expressions).index();
     }
 }

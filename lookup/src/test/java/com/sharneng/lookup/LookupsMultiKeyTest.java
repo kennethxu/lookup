@@ -49,51 +49,44 @@ public class LookupsMultiKeyTest {
     }
 
     @Test
-    public void create_chokes_onNullProperty() {
+    public void create_chokes_onNullExpression() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property2");
+        exception.expectMessage("expression");
+        exception.expectMessage("2nd");
 
         Lookups.create(CountyCode.codes, "state", (String) null);
     }
 
     @Test
-    public void createWithDefault_chokes_onNullProperty() {
+    public void createWithDefault_chokes_onNullExpression() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("property2");
+        exception.expectMessage("expression");
+        exception.expectMessage("2nd");
 
         Lookups.create(CountyCode.DEFAULT, CountyCode.codes, "state", (String) null);
     }
 
     @Test
-    public void create_chokes_onNullValues() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("values");
+    public void create_chokes_onNullSource() {
+        exception.expect(LookupBuildException.class);
+        exception.expectMessage("source");
 
         Lookups.create((Collection<CountyCode>) null, "state", "county");
     }
 
     @Test
-    public void create_chokes_onEmptyValues() {
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("values");
+    public void create_chokes_onEmptySource() {
+        exception.expect(LookupBuildException.class);
+        exception.expectMessage("source");
 
         Lookups.create(new ArrayList<CountyCode>(), "state", "county");
     }
 
     @Test
-    public void create_chokes_onNullFilledValues() {
-        final ArrayList<CountyCode> values = new ArrayList<CountyCode>();
-        values.add(null);
-        exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("values");
-
-        Lookups.create(values, "state", "county");
-    }
-
-    @Test
     public void create_chokes_onNullConverter() {
         exception.expect(IllegalArgumentException.class);
-        exception.expectMessage("converter2");
+        exception.expectMessage("converter");
+        exception.expectMessage("2nd");
 
         Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by(toState)
                 .by((Converter<CountyCode, Object>) null);
@@ -119,7 +112,7 @@ public class LookupsMultiKeyTest {
     }
 
     @Test
-    public void create_chokes_onDuplicateValues() {
+    public void create_chokes_onDuplicateSource() {
         List<CountyCode> codes = new ArrayList<CountyCode>();
         codes.add(new CountyCode(1, "A", "B"));
         codes.add(new CountyCode(2, "A", "B"));
@@ -144,9 +137,11 @@ public class LookupsMultiKeyTest {
             super("NoState", argumentDefault, defaultMatcher);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected Lookup<Lookup<CountyCode>> newLookup() {
-            return Lookups.create(CountyCode.DEFAULT, CountyCode.codes, "state", "county");
+            return (Lookup<Lookup<CountyCode>>) Lookups.create(CountyCode.DEFAULT, CountyCode.codes, new String[] {
+                    "state", "county" });
         }
     }
 
@@ -180,7 +175,7 @@ public class LookupsMultiKeyTest {
 
         @Override
         protected Lookup<CountyCode> newLookup() {
-            return Lookups.create(null, CountyCode.codes, "state", "county").get(found.getState());
+            return Lookups.create(CountyCode.codes, "state", "county").get(found.getState());
         }
     }
 
@@ -189,9 +184,11 @@ public class LookupsMultiKeyTest {
             super("NoState", CountyCode.DEFAULT);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected Lookup<CountyCode> newLookup() {
-            return Lookups.create(CountyCode.codes, "state", "county").get(found.getState());
+            return ((Lookup<Lookup<CountyCode>>) Lookups.create(CountyCode.codes, new String[] { "state", "county" }))
+                    .get(found.getState());
         }
     }
 

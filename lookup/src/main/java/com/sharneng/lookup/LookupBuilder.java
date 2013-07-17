@@ -72,6 +72,8 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
         @SuppressWarnings("unchecked")
         @Override
         public Defined<Lookup<?>> by(Converter<E, Object>... converters) {
+            if (converters == null) throw new IllegalArgumentException(Utils.notNull("converters"));
+            if (converters.length == 0) throw new IllegalArgumentException("Argument converters must not be empty");
             for (Converter<E, Object> converter : converters)
                 LookupBuilder.this.by(converter);
             return (Defined<Lookup<?>>) (Defined<?>) this;
@@ -103,11 +105,14 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
 
     @Override
     public <Q> Sourced<E, Q> select(Class<Q> clazz, String expression) {
+        if (expression == null) throw new IllegalArgumentException(Utils.notNull("expression"));
+        if (clazz == null) throw new IllegalArgumentException(Utils.notNull("clazz"));
         return select(new OgnlConverter<E, Q>(clazz, expression));
     }
 
     @Override
     public <Q> Sourced<E, Q> select(Converter<E, Q> converter) {
+        if (converter == null) throw new IllegalArgumentException(Utils.notNull("converter"));
         @SuppressWarnings("unchecked")
         final LookupBuilder<E, Q> that = (LookupBuilder<E, Q>) this;
         that.selectConverter = converter;
@@ -116,18 +121,22 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
 
     @Override
     public Indexed<E, Lookup<T>> by(Converter<E, Object> converter) {
+        if (converter == null) throw new IllegalArgumentException(Utils.notNullIndexed("converter",
+                converters.size() + 1));
         converters.add(converter);
         return indexer;
     }
 
     @Override
-    public Indexed<E, Lookup<T>> by(String property) {
-        return by(new OgnlConverter<E, Object>(Object.class, property));
+    public Indexed<E, Lookup<T>> by(String expression) {
+        if (expression == null) throw new IllegalArgumentException(Utils.notNullIndexed("expression",
+                converters.size() + 1));
+        return by(new OgnlConverter<E, Object>(Object.class, expression));
     }
 
     @Override
-    public Defined<Lookup<?>> by(String... properties) {
-        return indexer.by(properties);
+    public Defined<Lookup<?>> by(String... expressions) {
+        return indexer.by(expressions);
     }
 
     @Override
