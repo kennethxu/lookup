@@ -51,14 +51,16 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
 
         @SuppressWarnings("unchecked")
         @Override
-        public Indexed<E, Lookup<Lookup<T>>> by(String property) {
-            return (Indexed<E, Lookup<Lookup<T>>>) (Indexed<E, ?>) LookupBuilder.this.by(property);
+        public Indexed<E, Lookup<Lookup<T>>> by(String expression) {
+            return (Indexed<E, Lookup<Lookup<T>>>) (Indexed<E, ?>) LookupBuilder.this.by(expression);
         }
 
         @SuppressWarnings("unchecked")
         @Override
-        public Defined<Lookup<?>> by(String... properties) {
-            for (String s : properties)
+        public Defined<Lookup<?>> by(String... expressions) {
+            if (expressions == null) throw new IllegalArgumentException(Utils.notNull("expressions"));
+            if (expressions.length == 0) throw new IllegalArgumentException("Argument expressions must not be empty");
+            for (String s : expressions)
                 LookupBuilder.this.by(s);
             return (Defined<Lookup<?>>) (Defined<?>) this;
         }

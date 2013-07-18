@@ -5,11 +5,19 @@ import static org.hamcrest.Matchers.*;
 import com.sharneng.lookup.testdata.CountyCode;
 
 public class LookupBuilderSingleKeyTest {
+    private static final String INSTANCE_DEFAULT = "instanceDefault";
     private static final CountyCode found = new CountyCode(1081, "Alabama", "Lee");
 
     private static Lookup<CountyCode> createLookup(CountyCode instanceDefault) {
-        LookupBuilder<CountyCode, CountyCode> builder = new LookupBuilder<CountyCode, CountyCode>(CountyCode.codes);
-        return builder.defaultTo(instanceDefault).by("code").index();
+        return newBuilder().defaultTo(instanceDefault).by("code").index();
+    }
+
+    private static LookupBuilder<CountyCode, CountyCode> newBuilder() {
+        return new LookupBuilder<CountyCode, CountyCode>(CountyCode.codes);
+    }
+
+    private static Lookup<String> createSelectLookup(String instanceDefault) {
+        return newBuilder().select(String.class, "county").defaultTo(instanceDefault).by("code").index();
     }
 
     public static class WithDefaultFound extends LookupWithDefaultFoundTest<CountyCode> {
@@ -55,4 +63,49 @@ public class LookupBuilderSingleKeyTest {
             return createLookup(null);
         }
     }
+
+    public static class SelectWithDefaultFound extends LookupWithDefaultFoundTest<String> {
+        public SelectWithDefaultFound() {
+            super(found.getCode(), INSTANCE_DEFAULT, equalTo(INSTANCE_DEFAULT), equalTo(found.getCounty()));
+        }
+
+        @Override
+        protected Lookup<String> newLookup() {
+            return createSelectLookup(INSTANCE_DEFAULT);
+        }
+    }
+
+    public static class SelectWithDefaultNotFound extends LookupWithDefaultNotFoundTest<String> {
+        public SelectWithDefaultNotFound() {
+            super(-1, INSTANCE_DEFAULT, equalTo(INSTANCE_DEFAULT));
+        }
+
+        @Override
+        protected Lookup<String> newLookup() {
+            return createSelectLookup(INSTANCE_DEFAULT);
+        }
+    }
+
+    public static class SelectWithoutDefaultFound extends LookupWithoutDefaultFoundTest<String> {
+        public SelectWithoutDefaultFound() {
+            super(found.getCode(), INSTANCE_DEFAULT, equalTo(found.getCounty()));
+        }
+
+        @Override
+        protected Lookup<String> newLookup() {
+            return createSelectLookup(null);
+        }
+    }
+
+    public static class SelectWithoutDefaultNotFound extends LookupWithoutDefaultNotFoundTest<String> {
+        public SelectWithoutDefaultNotFound() {
+            super(-1, INSTANCE_DEFAULT);
+        }
+
+        @Override
+        protected Lookup<String> newLookup() {
+            return createSelectLookup(null);
+        }
+    }
+
 }
