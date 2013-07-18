@@ -12,6 +12,9 @@ import java.util.List;
  */
 public class CountyCode {
     public static final CountyCode DEFAULT = new CountyCode(0, null, null);
+    public static final CountyCode code100 = new CountyCode(100, "NJ", "Mercer");
+    public static final CountyCode code200 = new CountyCode(200, "NJ", "Mercer");
+    public static final List<CountyCode> dupCodes = Arrays.asList(new CountyCode[] { code100, code200 });
 
     private final int code;
     private final String state;

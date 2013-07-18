@@ -15,7 +15,6 @@ import org.junit.rules.ExpectedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
@@ -113,12 +112,9 @@ public class LookupsMultiKeyTest {
 
     @Test
     public void create_chokes_onDuplicateSource() {
-        List<CountyCode> codes = new ArrayList<CountyCode>();
-        codes.add(new CountyCode(1, "A", "B"));
-        codes.add(new CountyCode(2, "A", "B"));
         exception.expect(DuplicateKeyException.class);
 
-        Lookups.create(CountyCode.DEFAULT, codes, "state", "county");
+        Lookups.create(CountyCode.DEFAULT, CountyCode.dupCodes, "state", "county");
     }
 
     public static class FirstLevelFound extends LookupWithDefaultFoundTest<Lookup<CountyCode>> {
@@ -188,6 +184,55 @@ public class LookupsMultiKeyTest {
         @Override
         protected Lookup<CountyCode> newLookup() {
             return ((Lookup<Lookup<CountyCode>>) Lookups.create(CountyCode.codes, new String[] { "state", "county" }))
+                    .get(found.getState());
+        }
+    }
+
+    public static class FromWithDefaultFound extends LookupWithDefaultFoundTest<CountyCode> {
+        public FromWithDefaultFound() {
+            super(found.getCounty(), CountyCode.DEFAULT, equalTo(CountyCode.DEFAULT), equalTo(found));
+        }
+
+        @Override
+        protected Lookup<CountyCode> newLookup() {
+            return Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by(toState).by(toCounty).index()
+                    .get(found.getState());
+        }
+    }
+
+    public static class FromWithDefaultNotFound extends LookupWithDefaultNotFoundTest<CountyCode> {
+        public FromWithDefaultNotFound() {
+            super("NoState", CountyCode.DEFAULT, equalTo(CountyCode.DEFAULT));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected Lookup<CountyCode> newLookup() {
+            return ((Lookup<Lookup<CountyCode>>) Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT)
+                    .by("state", "county").index()).get(found.getState());
+        }
+    }
+
+    public static class FromWithoutDefaultFound extends LookupWithoutDefaultFoundTest<CountyCode> {
+        public FromWithoutDefaultFound() {
+            super(found.getCounty(), CountyCode.DEFAULT, equalTo(found));
+        }
+
+        @Override
+        protected Lookup<CountyCode> newLookup() {
+            return Lookups.from(CountyCode.codes).by("state").by("county").index().get(found.getState());
+        }
+    }
+
+    public static class FromWithoutDefaultNotFound extends LookupWithoutDefaultNotFoundTest<CountyCode> {
+        public FromWithoutDefaultNotFound() {
+            super("NoState", CountyCode.DEFAULT);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        protected Lookup<CountyCode> newLookup() {
+            return ((Lookup<Lookup<CountyCode>>) Lookups.from(CountyCode.codes).by(toState, toCounty).index())
                     .get(found.getState());
         }
     }

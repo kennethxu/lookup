@@ -9,18 +9,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
+@SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
 public class LookupBuilderNegativeTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    private final CountyCode code1 = new CountyCode(100, "NJ", "Mercer");
-    private final CountyCode code2 = new CountyCode(200, "NJ", "Mercer");
-    private final List<CountyCode> codes = Arrays.asList(new CountyCode[] { code1, code2 });
     private LookupBuilder<CountyCode, CountyCode> sut;
 
     @Before
@@ -29,7 +25,6 @@ public class LookupBuilderNegativeTest {
     }
 
     @Test
-    @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void select_chokes_onNullClazz() {
         exception.expect(IllegalArgumentException.class);
 
@@ -124,10 +119,10 @@ public class LookupBuilderNegativeTest {
 
     @Test
     public void index_chokes_onDuplicateMultipleKey() {
-        sut = new LookupBuilder<CountyCode, CountyCode>(codes);
+        sut = new LookupBuilder<CountyCode, CountyCode>(CountyCode.dupCodes);
         exception.expect(DuplicateKeyException.class);
-        exception.expectMessage(code1.toString());
-        exception.expectMessage(code2.toString());
+        exception.expectMessage(CountyCode.code100.toString());
+        exception.expectMessage(CountyCode.code200.toString());
         exception.expectMessage("NJ");
         exception.expectMessage("Mercer");
 

@@ -15,6 +15,10 @@ final class Utils {
     }
 
     static String notNullIndexed(final String argumentName, final int index) {
+        return "Argument of " + index + countingSuffix(index) + " " + argumentName + " parameter must not be null.";
+    }
+
+    static String countingSuffix(final int index) {
         String suffix;
         final int ten = 10;
         final int first = 1, secound = 2, third = 3;
@@ -32,7 +36,7 @@ final class Utils {
             suffix = "th";
             break;
         }
-        return "Argument of " + index + suffix + " " + argumentName + " parameter must not be null.";
+        return suffix;
     }
 
     static LookupException notFoundException(final Object key) {

@@ -46,6 +46,22 @@ public class LookupsTest {
     }
 
     @Test
+    public void fluent_takesFirst_whenUseFirstOnDuplicate() {
+        Lookup<Integer> lookup = Lookups.from(CountyCode.dupCodes).select(Integer.class, "code").useFirstOnDuplicate()
+                .by("state").index();
+
+        assertThat(lookup.find(CountyCode.code100.getState()), is(CountyCode.code100.getCode()));
+    }
+
+    @Test
+    public void fluent_takesLast_whenUseLastOnDuplicate() {
+        Lookup<Integer> lookup = Lookups.from(CountyCode.dupCodes).select(Integer.class, "code").useLastOnDuplicate()
+                .by("state").index();
+
+        assertThat(lookup.find(CountyCode.code200.getState()), is(CountyCode.code200.getCode()));
+    }
+
+    @Test
     public void syntax() {
         Lookups.from(CountyCode.codes).select(Integer.class, "code").defaultTo(100).by("state").by("county").index();
         Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by("state", "county").index();
