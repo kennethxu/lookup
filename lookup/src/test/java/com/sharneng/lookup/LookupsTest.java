@@ -7,6 +7,8 @@ import com.sharneng.lookup.testdata.CountyCode;
 
 import org.junit.Test;
 
+import java.util.Collection;
+
 public class LookupsTest {
 
     @Test
@@ -62,8 +64,63 @@ public class LookupsTest {
     }
 
     @Test
-    public void syntax() {
-        Lookups.from(CountyCode.codes).select(Integer.class, "code").defaultTo(100).by("state").by("county").index();
-        Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT).by("state", "county").index();
+    public void fluent_canBuildFromEmpty() {
+        Lookup<CountyCode> lookup = Lookups.from((Collection<CountyCode>) null).defaultTo(CountyCode.DEFAULT)
+                .by("code").index();
+
+        assertThat(lookup.get("anything"), is(CountyCode.DEFAULT));
+    }
+
+    @SuppressWarnings("unused")
+    public void syntaxCheck(boolean select, boolean hasDefault) {
+        if (!select && !hasDefault) {
+
+            Lookup<CountyCode> l1 = Lookups.from(CountyCode.codes).notEmpty().useFirstOnDuplicate().by("code").index();
+            Lookup<Lookup<CountyCode>> l2 = Lookups.from(CountyCode.codes).useLastOnDuplicate().notEmpty().by("state")
+                    .by("county").index();
+            Lookup<Lookup<Lookup<CountyCode>>> l3 = Lookups.from(CountyCode.codes).useLastOnDuplicate().notEmpty()
+                    .by("state").by("county").by("something").index();
+            @SuppressWarnings("unchecked")
+            Lookup<Lookup<CountyCode>> l4 = (Lookup<Lookup<CountyCode>>) Lookups.from(CountyCode.codes)
+                    .useLastOnDuplicate().notEmpty().by("state", "county").index();
+            @SuppressWarnings("unchecked")
+            Lookup<Lookup<Lookup<CountyCode>>> l5 = (Lookup<Lookup<Lookup<CountyCode>>>) Lookups.from(CountyCode.codes)
+                    .useLastOnDuplicate().notEmpty().by("state").by("county", "something").index();
+
+        } else if (!select && hasDefault) {
+
+            Lookup<CountyCode> l1 = Lookups.from(CountyCode.codes).notEmpty().useFirstOnDuplicate()
+                    .defaultTo(CountyCode.DEFAULT).by("code").index();
+            Lookup<Lookup<CountyCode>> l2 = Lookups.from(CountyCode.codes).defaultTo(CountyCode.DEFAULT)
+                    .useLastOnDuplicate().notEmpty().by("state").by("county").index();
+            Lookup<Lookup<Lookup<CountyCode>>> l3 = Lookups.from(CountyCode.codes).useLastOnDuplicate()
+                    .defaultTo(CountyCode.DEFAULT).notEmpty().by("state").by("county").by("something").index();
+            @SuppressWarnings("unchecked")
+            Lookup<Lookup<CountyCode>> l4 = (Lookup<Lookup<CountyCode>>) Lookups.from(CountyCode.codes)
+                    .useLastOnDuplicate().notEmpty().defaultTo(CountyCode.DEFAULT).by("state", "county").index();
+            @SuppressWarnings("unchecked")
+            Lookup<Lookup<Lookup<CountyCode>>> l5 = (Lookup<Lookup<Lookup<CountyCode>>>) Lookups.from(CountyCode.codes)
+                    .defaultTo(CountyCode.DEFAULT).useLastOnDuplicate().notEmpty().by("state")
+                    .by("county", "something").index();
+
+        } else if (select && !hasDefault) {
+
+            Lookup<Integer> l1 = Lookups.from(CountyCode.codes).select(Integer.class, "code").notEmpty()
+                    .useFirstOnDuplicate().by("code").index();
+            Lookup<Lookup<Integer>> l2 = Lookups.from(CountyCode.codes).useLastOnDuplicate()
+                    .select(Integer.class, "code").notEmpty().by("state").by("county").index();
+            Lookup<Lookup<Lookup<Integer>>> l3 = Lookups.from(CountyCode.codes).useLastOnDuplicate().notEmpty()
+                    .select(Integer.class, "code").by("state").by("county").by("something").index();
+
+        } else if (select && hasDefault) {
+
+            Lookup<Integer> l1 = Lookups.from(CountyCode.codes).select(Integer.class, "code").notEmpty().defaultTo(100)
+                    .useFirstOnDuplicate().by("code").index();
+            Lookup<Lookup<Integer>> l2 = Lookups.from(CountyCode.codes).useLastOnDuplicate()
+                    .select(Integer.class, "code").notEmpty().defaultTo(100).by("state").by("county").index();
+            Lookup<Lookup<Lookup<Integer>>> l3 = Lookups.from(CountyCode.codes).useLastOnDuplicate().notEmpty()
+                    .select(Integer.class, "code").defaultTo(100).by("state").by("county").by("something").index();
+
+        }
     }
 }
