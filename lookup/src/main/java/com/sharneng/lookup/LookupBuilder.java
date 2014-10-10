@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.CheckForNull;
-import javax.annotation.Nullable;
 
 /**
  * Class to hold factory methods to return the implementation of {@link Lookup}.
@@ -168,59 +167,59 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
         private final Object[] keys = new Object[keyCount];
 
         public Lookup<?> build() {
-        return (keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0)));
-    }
-
-    private Lookup<?>[] buildChain() {
-        Lookup<?>[] chain = new Lookup<?>[keyCount];
-        Lookup<?> lookup = new EmptyLookup<T>(defaultValue);
-        chain[0] = lookup;
-        for (int i = 1; i < keyCount; i++) {
-            lookup = new EmptyLookup<Object>(lookup);
-            chain[i] = lookup;
+            return (keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0)));
         }
-        return chain;
-    }
 
-    private Lookup<?> multiLevel(final Collection<? extends E> values, int index) {
-
-        Converter<E, Object> converter = converters.get(index);
-        if (++index == keyCount) return lastLevel(values, converter); // last one
-
-        Map<Object, Collection<E>> map = new HashMap<Object, Collection<E>>();
-        for (E value : values) {
-            Object key = converter.convert(value);
-            Collection<E> c = map.get(key);
-            if (c == null) {
-                c = new ArrayList<E>();
-                map.put(key, c);
+        private Lookup<?>[] buildChain() {
+            Lookup<?>[] chain = new Lookup<?>[keyCount];
+            Lookup<?> lookup = new EmptyLookup<T>(defaultValue);
+            chain[0] = lookup;
+            for (int i = 1; i < keyCount; i++) {
+                lookup = new EmptyLookup<Object>(lookup);
+                chain[i] = lookup;
             }
-            c.add(value);
+            return chain;
         }
 
-        Map<Object, Lookup<?>> lookupMap = new HashMap<Object, Lookup<?>>();
-        for (Map.Entry<Object, Collection<E>> entry : map.entrySet()) {
-            final Object key = entry.getKey();
-            keys[index - 1] = key;
-            lookupMap.put(key, multiLevel(entry.getValue(), index));
-        }
-
-        return new MapBasedLookup<Lookup<?>>(lookupMap, chain[keyCount - index - 1]);
-    }
-
-    private Lookup<T> lastLevel(final Collection<? extends E> values, Converter<E, Object> converter) {
-        final Map<Object, T> map = new HashMap<Object, T>();
-        for (E e : values) {
-            T value = selectConverter.convert(e);
-            final Object key = converter.convert(e);
-            if (duplication == Duplication.LAST || !map.containsKey(key)) {
-                map.put(key, value);
-            } else if (duplication == Duplication.FAIL) {
-                keys[keys.length - 1] = key;
-                throw new DuplicateKeyException(value, map.get(key), keys);
+        private Lookup<?> multiLevel(final Collection<? extends E> values, int index) {
+    
+            Converter<E, Object> converter = converters.get(index);
+            if (++index == keyCount) return lastLevel(values, converter); // last one
+    
+            Map<Object, Collection<E>> map = new HashMap<Object, Collection<E>>();
+            for (E value : values) {
+                Object key = converter.convert(value);
+                Collection<E> c = map.get(key);
+                if (c == null) {
+                    c = new ArrayList<E>();
+                    map.put(key, c);
+                }
+                c.add(value);
             }
+
+            Map<Object, Lookup<?>> lookupMap = new HashMap<Object, Lookup<?>>();
+            for (Map.Entry<Object, Collection<E>> entry : map.entrySet()) {
+                final Object key = entry.getKey();
+                keys[index - 1] = key;
+                lookupMap.put(key, multiLevel(entry.getValue(), index));
+            }
+    
+            return new MapBasedLookup<Lookup<?>>(lookupMap, chain[keyCount - index - 1]);
         }
-        return new MapBasedLookup<T>(map, defaultValue);
+
+        private Lookup<T> lastLevel(final Collection<? extends E> values, Converter<E, Object> converter) {
+            final Map<Object, T> map = new HashMap<Object, T>();
+            for (E e : values) {
+                T value = selectConverter.convert(e);
+                final Object key = converter.convert(e);
+                if (duplication == Duplication.LAST || !map.containsKey(key)) {
+                    map.put(key, value);
+                } else if (duplication == Duplication.FAIL) {
+                    keys[keys.length - 1] = key;
+                    throw new DuplicateKeyException(value, map.get(key), keys);
+                }
+            }
+            return new MapBasedLookup<T>(map, defaultValue);
+        }
     }
-}
 }
