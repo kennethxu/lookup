@@ -108,7 +108,9 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
     @Override
     public T get(@CheckForNull final Object key, final T defaultValue) {
         if (defaultValue == null) throw new IllegalArgumentException(Utils.notNull("defaultValue"));
-        return find(key, defaultValue);
+        T result = find(key, defaultValue);
+        assert(result != null);
+        return result;
     }
 
     /**

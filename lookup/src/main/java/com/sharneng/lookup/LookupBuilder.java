@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 /**
  * Class to hold factory methods to return the implementation of {@link Lookup}.
@@ -86,7 +87,9 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
     private Duplication duplication = Duplication.FAIL;
     @CheckForNull
     private T defaultValue;
+    @Nullable
     private Lookup<?>[] chain;
+    @Nullable
     private Object[] keys;
     private final Collection<? extends E> source;
     @SuppressWarnings("unchecked")

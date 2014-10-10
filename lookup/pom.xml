@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>9</version>
     </parent>
 
     <name>lookup</name>
@@ -52,7 +52,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.2.1</version>
+                    <version>2.5.1</version>
                     <executions>
                         <execution>
                             <id>default</id>
@@ -168,8 +168,18 @@
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sharneng</groupId>
+            <artifactId>jsr305defaults</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
             <artifactId>annotations</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.3</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

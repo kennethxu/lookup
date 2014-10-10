@@ -27,11 +27,14 @@ import org.junit.rules.ExpectedException;
 import java.util.Collection;
 import java.util.Collections;
 
+import javax.annotation.Nullable;
+
 @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
 public class LookupBuilderNegativeTest {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
+    @Nullable
     private LookupBuilder<CountyCode, CountyCode> sut;
 
     @Before

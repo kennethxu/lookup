@@ -19,7 +19,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.hamcrest.Matcher;
 import org.junit.Rule;
@@ -102,7 +102,7 @@ public abstract class LookupWithDefaultNotFoundTest<T> {
     }
 
     @Test
-    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
+    @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void getWithDefault_Chokes_onNullDefaultParam() {
         Lookup<T> lookup = newLookup();
         exception.expect(IllegalArgumentException.class);
@@ -125,7 +125,7 @@ public abstract class LookupWithDefaultNotFoundTest<T> {
     }
 
     @Test
-    @SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
+    @SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
     public void hunt_Chokes_onNullKeyWithDefault() {
         Lookup<T> lookup = newLookup();
         exception.expect(IllegalArgumentException.class);

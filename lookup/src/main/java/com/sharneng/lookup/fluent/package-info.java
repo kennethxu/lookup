@@ -18,7 +18,5 @@
  * 
  * @author Kenneth Xu
  */
-@javax.annotation.Nonnull
-@javax.annotation.ParametersAreNonnullByDefault
+@com.sharneng.annotation.NonnullByDefault
 package com.sharneng.lookup.fluent;
-

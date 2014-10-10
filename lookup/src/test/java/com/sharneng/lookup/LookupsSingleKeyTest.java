@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.*;
 
 import com.sharneng.lookup.testdata.CountyCode;
 
-import edu.umd.cs.findbugs.annotations.SuppressWarnings;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("NP_NONNULL_PARAM_VIOLATION")
+@SuppressFBWarnings("NP_NONNULL_PARAM_VIOLATION")
 public class LookupsSingleKeyTest {
     private static final CountyCode found = CountyCode.codes.get(56);
     private static final Converter<CountyCode, Object> toCode = new Converter<CountyCode, Object>() {
