@@ -93,6 +93,7 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
      * 
      * @return the reference object found or the {@code defaultValue} passed to the constructor if not found
      */
+    @Override
     public T get(@CheckForNull final Object key) {
         final T result = find(key, defaultValue);
         if (result != null) return result;
@@ -119,6 +120,7 @@ public abstract class AbstractLookup<T> implements Lookup<T> {
      * This implementation triggers exception when key is null or {@link #lookup(Object)} returns null. Otherwise,
      * delegates to {@code lookup} and return the value.
      */
+    @Override
     public T hunt(final Object key) {
         if (key == null) throw new IllegalArgumentException(Utils.notNull("key"));
         final T value = lookup(key);

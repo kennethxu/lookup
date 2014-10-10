@@ -47,7 +47,7 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
         @SuppressWarnings("unchecked")
         @Override
         public Lookup<T> index() {
-            return (Lookup<T>) build();
+            return (Lookup<T>) new Builder().build();
         }
 
         @SuppressWarnings("unchecked")
@@ -87,16 +87,11 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
     private Duplication duplication = Duplication.FAIL;
     @CheckForNull
     private T defaultValue;
-    @Nullable
-    private Lookup<?>[] chain;
-    @Nullable
-    private Object[] keys;
     private final Collection<? extends E> source;
     @SuppressWarnings("unchecked")
     private Converter<E, T> selectConverter = (Converter<E, T>) Utils.toSelf();
-    private int keyCount;
-    private List<Converter<E, Object>> converters = new ArrayList<Converter<E, Object>>();
-    private Indexer indexer = new Indexer();
+    private final List<Converter<E, Object>> converters = new ArrayList<Converter<E, Object>>();
+    private final Indexer indexer = new Indexer();
 
     public LookupBuilder(@CheckForNull final Collection<? extends E> source) {
         this.source = source == null ? Collections.<E> emptyList() : source;
@@ -167,10 +162,12 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
         return this;
     }
 
-    private Lookup<?> build() {
-        keyCount = converters.size();
-        this.chain = buildChain();
-        this.keys = new Object[keyCount];
+    private class Builder {
+        private final int keyCount = converters.size();
+        private final Lookup<?>[] chain = buildChain();
+        private final Object[] keys = new Object[keyCount];
+
+        public Lookup<?> build() {
         return (keyCount > 1 ? multiLevel(source, 0) : lastLevel(source, converters.get(0)));
     }
 
@@ -225,5 +222,5 @@ final class LookupBuilder<E, T> implements Sourced<E, T> {
         }
         return new MapBasedLookup<T>(map, defaultValue);
     }
-
+}
 }
